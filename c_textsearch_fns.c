@@ -2,8 +2,7 @@
 #include <stdlib.h> 
 #include "textsearch_fns.h"
 
-int read_line(FILE *in, char *buf)
-{
+int read_line(FILE *in, char *buf) {
     int index = 0;
     char c = fgetc(in);
     //get all characters until you encounter newline/EOF(=-1)/exceed line max
@@ -19,8 +18,7 @@ int read_line(FILE *in, char *buf)
 }
 
 
-void print_line(FILE *out, const char *buf)
-{
+void print_line(FILE *out, const char *buf) {
     if (out != NULL)
     {
         fprintf(out, "%s\n", buf);
@@ -77,7 +75,6 @@ int strings_equal(const char *s1, const char *s2)
             return 0;
         }
     }
-    printf("\n%s = %s\n\n", s1, s2);
     return 1;
 }
 
