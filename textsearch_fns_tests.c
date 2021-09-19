@@ -268,11 +268,22 @@ void test_strings_equal(TestObjs *objs) {
 
     //newline char
     ASSERT(strings_equal("yXxwXcxXgkHS7Apt7\n", "yXxwXcxXgkHS7Apt7") == 1);
-
-    //string literals, not equals, same beginning/same ending, prefix and suffix, palendromes, 
 }
 
 void test_find_all_occurrences(TestObjs *objs) {
+//unsigned find_all_occurrences(FILE *in, char *search, int printOccurrences)
+//int printOccurences = 0 don't print, 1 == print
+//return # of occurences
+    FILE *in = fmemopen((char *) objs->pandp, strlen(objs->pandp), "r");
+
+    //no printing
+    ASSERT(find_all_occurrences(in, "we", 0) == 3);
+    
+
+
+    //printing
+
+    fclose(in);
     //TODO: implement
     //pass output, and string and make sure printing is working
     //
