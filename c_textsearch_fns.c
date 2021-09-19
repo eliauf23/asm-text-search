@@ -28,10 +28,11 @@ void print_line(FILE *out, const char *buf) {
 
 unsigned count_occurrences(const char *line, const char *str)
 {
+    unsigned line_total = 0;
+
     int str_len = find_string_length(str);
     int line_len = find_string_length(line);
-    unsigned line_total = 0;
-    int last_index = line_len - str_len;
+    int last_index = line_len - str_len + 1;
     if (last_index == 0) return 0;
 
     for (int i = 0; i < last_index; i++) {

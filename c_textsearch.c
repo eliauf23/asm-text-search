@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "textsearch_fns.h"
+#include <string.h> 
+//remove str.h just using for moment
 
 /*
  * Description: Main function
@@ -16,41 +18,56 @@
 int main(int argc, char **argv)
 {
     FILE *input;
+    char *search = argv[argc - 2];
 
-    //TODO: remove - debugging print statement
-    //printf("\nargv[0] = %s, argv[1] = %s, argv[2] = %s, argv[3] = %s\n\n", argv[0], argv[1], argv[2], argv[3]);
+    int filename_idx = argc - 1;
 
-    //exit with error code 1 if there's error w number of user args
-    if ((argc != 3) && (argc != 4))
+    //error types - check down below
+    int too_few_args = argc < 3;
+    int too_many_args = argc > 4;
+    int has_c_flag = strings_equal(argv[1], "-c");
+
+    int num_occurrences = 0;
+
+    //initial error handling & try to open file
+    if (too_few_args)
     {
-        fprintf(stderr, "User arguments are invalid.");
+        fprintf(stderr, "User did not supply sufficient arguments.");
+        exit(1);
+    } else if(too_many_args) {
+        fprintf(stderr, "User supplied too many arguments.");
         exit(1);
     }
-
-    //open user-specified text file to read from
-    input = fopen(argv[argc - 1], "r");
-
-    //check that file isn't null before reading
-    if (input == NULL)
+    else
     {
-        fprintf(stderr, "File cannot be opened. ");
-        fclose(input);
-        exit(1);
+        //open user-specified text file to read from
+        input = fopen(argv[filename_idx], "r");
+
+        if (input == NULL)
+        {
+            fprintf(stderr, "File cannot be opened. ");
+            fclose(input);
+            exit(1);
+        }
     }
 
-    //determine whether user wants lines to be printed
-    int printOccurrences = (argc == 3)? 1:0;
-
-    int num_occurrences = find_all_occurrences(input, argv[argc - 2], printOccurrences);
-    //if !printOccurrences -> argv == 4
-    if (printOccurrences == 0 && strings_equal(argv[1], "-c"))
+    if (argc == 3 && !has_c_flag)
     {
-        //print num occurrences instead
+        //1 = set print occurrences to true
+        num_occurrences = find_all_occurrences(input, search, 1);
+    }
+    else if (argc == 4 && has_c_flag)
+    {
+        //0 = set print occurrences to false
+        num_occurrences = find_all_occurrences(input, search, 0);
         fprintf(stdout, "%d occurrence(s)", num_occurrences);
+    } else {
+        fprintf(stderr, "Error!");
+        exit(1);
     }
+    
 
     //program ran successfully
     fclose(input);
-
     exit(0);
 }
