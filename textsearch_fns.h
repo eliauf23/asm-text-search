@@ -108,7 +108,7 @@ unsigned find_all_occurrences(FILE* in, char* search, int printOccurrences);
  *   i - index that substring begins at
  *
  * Returns:
- *   desc return val
+ *   dynamically allocated character array with substring
  */
 
 char *get_substr(const char *line, int str_len, int i);
