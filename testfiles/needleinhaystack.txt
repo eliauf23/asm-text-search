@@ -1,0 +1,12 @@
+line 1:(no matches) haystack haystack haystack haystack haystack 
+line 2: haystack haystack haystack needle haystack
+line 3: haystack haystack haystack haystack needle 
+line 4: haystack haystackneedle haystack haystack 
+line 5: haystack needlehaystack haystack haystack 
+line 6: haystackneedlehaystack haystack haystack haystack 
+line 7:(no matches) needlhaystack eedlehaystack haystack haystack haystack
+//next line has match after 511 chars!
+line 8:(511 chars then n-e-e-d-l-e) haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack hayst needle
+//next line has partial match before 511 chars!
+line 8:(511 chars then n-e-e-d-l-e) haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack haystack  needle
+needlE
