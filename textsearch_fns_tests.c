@@ -7,8 +7,9 @@
 typedef struct {
     const char *pandp;
     const char *palindromes;
-    const char *maxline_a;
+    const char *maxline_513;
     const char *maxline_b;
+    const char *maxline_512;
     const char *empty;
     const char *justnewline;
     const char *justEOF;
@@ -70,9 +71,12 @@ TestObjs *setup(void) {
         "daughters.\n";
     //3 occurrences of racecar
     objs->palindromes = "racecaracecaracecar";
-    //511 a's followed by 1 b
-    objs->maxline_a = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab";
-    objs->maxline_b = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaastar";
+    //512 a's followed by 1 b and \n
+    objs->maxline_513 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab\n";
+    //515 chars
+    objs->maxline_b = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaastar\n";
+    //510 chars and \n
+    objs->maxline_512 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab\n";
     objs->empty = "";
     objs->justnewline = "\n";
     objs->justEOF = EOF;
@@ -158,8 +162,6 @@ void test_print_line(TestObjs *objs) {
 
 
 void test_count_occurrences(TestObjs *objs) {
-    //unsigned count_occurrences(const char *line, const char *str)
-    //return line_total;
 
     FILE *in_1 = fmemopen((char *) objs->pandp, strlen(objs->pandp), "r");
     char bufa[MAXLINE + 1];
@@ -186,7 +188,7 @@ void test_count_occurrences(TestObjs *objs) {
     fclose(in_1);
 
     //testing letters after char limit
-    FILE *in_2 = fmemopen((char *) objs->maxline_a, strlen(objs->maxline_a), "r");
+    FILE *in_2 = fmemopen((char *) objs->maxline_513, strlen(objs->maxline_513), "r");
     char bufb[MAXLINE + 1];
 
     ASSERT(count_occurrences(read_line(in_2, bufb), "b") == 0);
@@ -202,24 +204,48 @@ void test_count_occurrences(TestObjs *objs) {
     fclose(in_3);
 
    
-    //Test for Capital/lower, spacing (t r u t h vs truth), overlaping,
-    // MAXLINE (right before char, after max line char, right before half of word, right after half of word)
+    //TODO: MAXLINE (right before char, after max line char)
     //3-4 random cases with the alphanumeric
 
 }
 
 
 void test_find_string_length(TestObjs *objs) {
-    //TODO: implement
-    //0, 512, random
-    //calloc / free various length strings
+
+    // empty string
+    ASSERT(find_string_length(objs->empty) == 0);
+
+    //new line
+    ASSERT(find_string_length(objs->justnewline) == 0);
+
+    //maxline_513 len = 513
+    ASSERT(find_string_length(objs->maxline_513) == 512);
+
+    //512 bc should only read up to 512 chars
+    ASSERT(find_string_length(objs->maxline_513) == 512);
+
+    //random
+    ASSERT(find_string_length(objs->palindromes) == 19);
+
+    //line from pandp
+    ASSERT(find_string_length("considered as the rightful property of some one or other of their\n") == 65);
+
 }
 
 
-
 void test_starts_with(TestObjs *objs) {
-    //TODO: implement
-    //change last couple of charachters
+
+    //simple true check
+    ASSERT(starts_with("wordalala", "wor") == 1);
+
+    //simple false check
+    ASSERT(starts_with("wordalala", "not") == 0);
+
+    //prefix is longer than string
+    ASSERT(starts_with("wor", "wordalala") == 0);
+
+    //words are equal
+    ASSERT(starts_with("word", "word") == 1);
     
 }
 
