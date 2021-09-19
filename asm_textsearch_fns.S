@@ -3,7 +3,7 @@
  * textsearch_fns.h
  */
 
-	.section .text
+	.section .text 
 
 /*
  * The following is just an example of how an assembly language

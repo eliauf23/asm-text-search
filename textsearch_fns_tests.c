@@ -6,8 +6,9 @@
 
 typedef struct {
     const char *pandp;
-        const char *palindromes;
-    const char *maxline;
+    const char *palindromes;
+    const char *maxline_a;
+    const char *maxline_b;
     const char *empty;
     const char *justnewline;
     const char *justEOF;
@@ -70,7 +71,8 @@ TestObjs *setup(void) {
     //3 occurrences of racecar
     objs->palindromes = "racecaracecaracecar";
     //511 a's followed by 1 b
-    objs->maxline = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab";
+    objs->maxline_a = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab";
+    objs->maxline_b = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaastar";
     objs->empty = "";
     objs->justnewline = "\n";
     objs->justEOF = EOF;
@@ -139,41 +141,106 @@ void test_read_line(TestObjs *objs) {
     ASSERT(!read_line(in, buf));
 
     fclose(in);
+
+    //edge case return 0 if there is a next line, non zero value when you encounter EOF
+    //TODO: Make sure we get the proper return value
+
+    //TODO: empty file or just /n want to make sure returns right thing    
 }
 
 // TODO: implementations of other test functions
 
 void test_print_line(TestObjs *objs) {
-    //TODO: implement
+    //TODO: implement (print various lines print properly)
+
+    //only ever use it for stoud and by def not null
 }
 
+
 void test_count_occurrences(TestObjs *objs) {
-    //TODO: implement
+    //unsigned count_occurrences(const char *line, const char *str)
+    //return line_total;
+
+    FILE *in_1 = fmemopen((char *) objs->pandp, strlen(objs->pandp), "r");
+    char bufa[MAXLINE + 1];
+
+    //simple case
+    ASSERT(count_occurrences(read_line(in_1, bufa), "truth") == 1);
+
+    //checking case sensitivity 1
+    ASSERT(count_occurrences(read_line(in_1, bufa), "Good") == 0);
+
+    // just newline char
+    ASSERT(count_occurrences(read_line(in_1, bufa), "NA") == 0);
+
+    //ignores punctuation 
+    //line reads in text "neighbourhood, this"
+    ASSERT(count_occurrences(read_line(in_1, bufa), "neighbourhood this") == 1);
+
+    //testing multiple occurances of substrings
+    ASSERT(count_occurrences(read_line(in_1, bufa), "is") == 2);
+
+    //spacing test
+    ASSERT(count_occurrences(read_line(in_1, bufa), "s o m e") == 0);
+    
+    fclose(in_1);
+
+    //testing letters after char limit
+    FILE *in_2 = fmemopen((char *) objs->maxline_a, strlen(objs->maxline_a), "r");
+    char bufb[MAXLINE + 1];
+
+    ASSERT(count_occurrences(read_line(in_2, bufb), "b") == 0);
+
+    fclose(in_2);
+
+    //testing word that goes over the char limit
+    FILE *in_3 = fmemopen((char *) objs->maxline_b, strlen(objs->maxline_b), "r");
+    char bufc[MAXLINE + 1];
+
+    ASSERT(count_occurrences(read_line(in_3, bufc), "star") == 0);
+
+    fclose(in_3);
+
+   
+    //Test for Capital/lower, spacing (t r u t h vs truth), overlaping,
+    // MAXLINE (right before char, after max line char, right before half of word, right after half of word)
+    //3-4 random cases with the alphanumeric
+
 }
 
 
 void test_find_string_length(TestObjs *objs) {
     //TODO: implement
+    //0, 512, random
+    //calloc / free various length strings
 }
 
 
 
 void test_starts_with(TestObjs *objs) {
     //TODO: implement
+    //change last couple of charachters
+    
 }
 
 
 void test_strings_equal(TestObjs *objs) {
     //TODO: implement
+    //string literals, not equals, same beginning/same ending, prefix and suffix, palendromes, 
 }
 
 void test_find_all_occurrences(TestObjs *objs) {
     //TODO: implement
+    //pass output, and string and make sure printing is working
+    //
 }
 
 
 void test_get_substr(TestObjs *objs) {
     //TODO: implement
+    //pre/sufix, try accessing out of bounds in memory
+    //str  abc from word dcabc starting at b 
+
 }
 
 
