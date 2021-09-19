@@ -22,7 +22,6 @@ void print_line(FILE *out, const char *buf) {
     if (out != NULL)
     {
         fprintf(out, "%s\n", buf);
-
     }
 }
 
@@ -53,6 +52,7 @@ unsigned find_string_length(const char *s)
     }
     return len;
 }
+
 int starts_with(const char *s, const char *pfx) {
     int pfx_len = find_string_length(pfx);
     for(int i = 0; i < pfx_len; i++) {
@@ -60,9 +60,9 @@ int starts_with(const char *s, const char *pfx) {
             return 0;
         }
     }
-
     return 1; //true
 }
+
 int strings_equal(const char *s1, const char *s2)
 {
 
