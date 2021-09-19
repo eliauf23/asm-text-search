@@ -20,9 +20,14 @@ void cleanup(TestObjs *objs);
 
 // TODO: declare test functions
 
-// Example:
-// void test_read_line(TestObjs *objs);
-
+void test_read_line(TestObjs *objs);
+void test_print_line(TestObjs *objs);
+void test_count_occurrences(TestObjs *objs);
+void test_find_string_length(TestObjs *objs);
+void test_starts_with(TestObjs *objs);
+void test_strings_equal(TestObjs *objs);
+void test_find_all_occurrences(TestObjs *objs);
+void test_get_substr(TestObjs *objs);
 
 int main(int argc, char **argv) {
     // Allow the name of the test function to execute to be specified
@@ -33,8 +38,16 @@ int main(int argc, char **argv) {
 
     TEST_INIT();
 
-    // TODO: invoke test functions
+// TODO: invoke test functions
     // TEST(test_read_line);
+    // TEST(test_print_line);
+    // TEST(test_count_occurrences);
+    // TEST(test_find_string_length);
+    // TEST(test_starts_with);
+    // TEST(test_strings_equal);
+    // TEST(test_find_all_occurrences);
+    // TEST(test_get_substr);
+
 
     TEST_FINI();
 
