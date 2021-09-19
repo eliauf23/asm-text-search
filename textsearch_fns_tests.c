@@ -40,15 +40,15 @@ int main(int argc, char **argv) {
 
     TEST_INIT();
 
-// TODO: invoke test functions
-    // TEST(test_read_line);
-    // TEST(test_print_line);
-    // TEST(test_count_occurrences);
-    // TEST(test_find_string_length);
-    // TEST(test_starts_with);
-    // TEST(test_strings_equal);
-    // TEST(test_find_all_occurrences);
-    // TEST(test_get_substr);
+
+    TEST(test_read_line);
+    TEST(test_print_line);
+    TEST(test_count_occurrences);
+    TEST(test_find_string_length);
+    TEST(test_starts_with);
+    TEST(test_strings_equal);
+    TEST(test_find_all_occurrences);
+    TEST(test_get_substr);
 
 
     TEST_FINI();
@@ -251,7 +251,24 @@ void test_starts_with(TestObjs *objs) {
 
 
 void test_strings_equal(TestObjs *objs) {
-    //TODO: implement
+//int strings_equal(const char *s1, const char *s2)
+// 1 = true, 0 = false
+
+    //simple true
+    ASSERT(strings_equal("abc", "abc") == 1);
+
+    //simple false
+    ASSERT(strings_equal("abc", "def") == 0);
+
+    //similar strings
+    ASSERT(strings_equal("hi my name is Rosie", "hi my age is Rosie") == 0);
+
+    //smae but w/ space
+    ASSERT(strings_equal("welcome", "wel come") == 0);
+
+    //newline char
+    ASSERT(strings_equal("yXxwXcxXgkHS7Apt7\n", "yXxwXcxXgkHS7Apt7") == 1);
+
     //string literals, not equals, same beginning/same ending, prefix and suffix, palendromes, 
 }
 
