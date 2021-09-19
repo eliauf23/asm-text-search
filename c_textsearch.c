@@ -11,9 +11,7 @@
  *
  * Returns:
  *   0 - if program successfully executes.
- *   1 - if user input is invalid
- *   2 - if file cannot be opened
- *   3 - other error
+ *   1 - if user input is invalid or file cannot be opened
  */
 int main(int argc, char **argv)
 {
@@ -37,7 +35,7 @@ int main(int argc, char **argv)
     {
         fprintf(stderr, "File cannot be opened. ");
         fclose(input);
-        exit(2);
+        exit(1);
     }
 
     //determine whether user wants lines to be printed
