@@ -55,7 +55,8 @@ TestObjs *setup(void) {
     objs->empty = "";
     objs->justnewline = "\n";
     objs->justEOF = EOF;
-    objs->randomAlphanumeric ="tfm92jH2m9UxobL7\n
+    objs->randomAlphanumeric =
+    "itfm92jH2m9UxobL7\n"
        "38VwNhd8Fsx7tQnx7\n"
        "tnlUIHoaNL08hxEa7\n"
        "12KSL9o5ZiZHV3uI7\n"
@@ -137,6 +138,7 @@ void test_find_string_length(TestObjs *objs) {
 }
 
 
+
 void test_starts_with(TestObjs *objs) {
     //TODO: implement
 }
@@ -146,8 +148,6 @@ void test_strings_equal(TestObjs *objs) {
     //TODO: implement
 }
 
-
-
 void test_find_all_occurrences(TestObjs *objs) {
     //TODO: implement
 }
@@ -156,10 +156,6 @@ void test_find_all_occurrences(TestObjs *objs) {
 void test_get_substr(TestObjs *objs) {
     //TODO: implement
 }
-
-
-
-
 
 
 
