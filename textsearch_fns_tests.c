@@ -6,6 +6,12 @@
 
 typedef struct {
     const char *pandp;
+        const char *palindromes;
+    const char *maxline;
+    const char *empty;
+    const char *justnewline;
+    const char *justEOF;
+    const char *randomAlphanumeric;
 } TestObjs;
 
 
