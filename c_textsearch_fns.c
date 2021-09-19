@@ -31,6 +31,7 @@ unsigned count_occurrences(const char *line, const char *str)
 
     int str_len = find_string_length(str);
     int line_len = find_string_length(line);
+    //TODO: make sure I'm not going out of bounds
     int last_index = line_len - str_len + 1;
     if (last_index == 0) return 0;
 
@@ -106,7 +107,7 @@ unsigned find_all_occurrences(FILE *in, char *search, int printOccurrences)
 
 char *get_substr(const char *line, int str_len, int i)
 {
-
+    
     char *substr = calloc(str_len, sizeof(char));
     for (int j = 0; j < str_len; j++)
     {
