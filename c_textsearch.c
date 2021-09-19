@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "textsearch_fns.h"
-#include <string.h> 
-//remove str.h just using for moment
 
 /*
  * Description: Main function
@@ -56,11 +54,10 @@ int main(int argc, char **argv)
         //1 = set print occurrences to true
         num_occurrences = find_all_occurrences(input, search, 1);
     }
-    else if (argc == 4 && has_c_flag)
+    else if (argc == 4)
     {
         //0 = set print occurrences to false
-        num_occurrences = find_all_occurrences(input, search, 0);
-        fprintf(stdout, "%d occurrence(s)", num_occurrences);
+        printf("%d occurrence(s)\n", find_all_occurrences(input, search, 0));
     } else {
         fprintf(stderr, "Error!");
         exit(1);
