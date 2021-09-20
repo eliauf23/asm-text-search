@@ -19,8 +19,6 @@ typedef struct {
 TestObjs *setup(void);
 void cleanup(TestObjs *objs);
 
-// TODO: declare test functions
-
 void test_read_line(TestObjs *objs);
 void test_print_line(TestObjs *objs);
 void test_count_occurrences(TestObjs *objs);
@@ -162,15 +160,23 @@ void test_print_line(TestObjs *objs) {
 
     */
 
-   char buf[MAXLINE + 1];
-   FILE *out = fmemopen(buf, sizeof(buf),"w");
+   //simple printing test
+   char buf_1[MAXLINE + 1];
+   FILE *out_1 = fmemopen(buf_1, sizeof(buf_1),"w");
 
-   print_line(out, "This is a test line. Did it work??");
-   fclose(out);
-   printf("%s", buf);
-   ASSERT(0 == strcmp(buf, "This is a test line. Did it work??\n"));
+   print_line(out_1, "This is a test line. Did it work??");
+   fclose(out_1);
+   ASSERT(0 == strcmp(buf_1, "This is a test line. Did it work??\n"));
 
+
+    //print line that is greater than the maxline limit
+    char buf_2[MAXLINE + 1];
+    FILE *out_2 = fmemopen(buf_2, sizeof(buf_2),"w");
     
+    print_line(out_2, objs->maxline_513);
+    fclose(out_2);         
+    ASSERT(0 == strcmp(buf_2, objs->maxline_513 ));
+
 
     //only ever use it for stoud and by def not null
 }
