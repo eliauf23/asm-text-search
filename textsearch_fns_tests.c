@@ -175,11 +175,10 @@ void test_count_occurrences(TestObjs *objs) {
     ASSERT(count_occurrences("on his first entering a neighbourhood, this truth is so well", "neighbourhood, this") == 1);
 
     //testing multiple occurances of substrings
-    ASSERT(count_occurrences("fixed in the minds of the surrounding families, that he is", "in") == 2);
+    ASSERT(count_occurrences("fixed in the minds of the surrounding families, that he is", "in") == 3);
 
     //spacing test
     ASSERT(count_occurrences("considered as the rightful property of some one or other of their", "s o m e") == 0);
-    
 
     //testing letters after char limit
     ASSERT(count_occurrences(objs->maxline_513, "b") == 0);
