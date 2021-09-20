@@ -288,8 +288,36 @@ void test_get_substr(TestObjs *objs) {
     //char *get_substr(const char *line, int str_len, int i)
 
     //TODO: implement
-    //pre/sufix, try accessing out of bounds in memory
-    //str  abc from word dcabc starting at b 
+    // palindromes = "racecaracecar...."
+    ASSERT(0 == strcmp(get_substr(objs->palindromes, 3, 0), "rac"));
+
+    //first word
+    ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", 5, 0), "hello"));
+
+    //last word
+    ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", 7, 38), "program"));
+
+    //middle world
+    ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", 3, 21), "the"));
+
+    //DNE
+    ASSERT(0 == strcmp(get_substr("", 1, 2 ), ""));
+
+
+    //i + str_len> line_len BUT i < line_len
+    ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", 3, 43), "am"));
+
+    // i == line_len
+    ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", 4, 45), ""));
+    
+
+    //i > line_len
+    //TODO: Look at this edge case. It wraps around and prints "hello ";
+    printf("THis prints: %s :EOF\n", get_substr("hello and welcome to the tets of this program", 6, 46));
+    ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", 6, 46), ""));
+
+
+    //i == 100
 
 
 
