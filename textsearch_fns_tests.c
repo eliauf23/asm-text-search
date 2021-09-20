@@ -183,7 +183,6 @@ void test_count_occurrences(TestObjs *objs) {
     //testing letters after char limit
     ASSERT(count_occurrences(objs->maxline_513, "b") == 0);
 
-
     //testing word that overflows over the char limit
     ASSERT(count_occurrences(objs->maxline_over, "star") == 0);
 

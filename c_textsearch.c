@@ -25,8 +25,6 @@ int main(int argc, char **argv)
     int too_many_args = argc > 4;
     int has_c_flag = strings_equal(argv[1], "-c");
 
-    int num_occurrences = 0;
-
     //initial error handling & try to open file
     if (too_few_args)
     {
@@ -52,7 +50,7 @@ int main(int argc, char **argv)
     if (argc == 3 && !has_c_flag)
     {
         //1 = set print occurrences to true
-        num_occurrences = find_all_occurrences(input, search, 1);
+        find_all_occurrences(input, search, 1);
     }
     else if (argc == 4)
     {
@@ -62,7 +60,7 @@ int main(int argc, char **argv)
         fprintf(stderr, "Error!");
         exit(1);
     }
-    
+
 
     //program ran successfully
     fclose(input);

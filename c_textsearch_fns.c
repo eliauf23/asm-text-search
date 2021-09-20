@@ -34,6 +34,9 @@ unsigned count_occurrences(const char *line, const char *str)
 
     int str_len = find_string_length(str);
     int line_len = find_string_length(line);
+
+    if(line_len > 512) line_len = 512;
+    
     //TODO: make sure I'm not going out of bounds
     int last_index = line_len - str_len + 1;
     if (last_index == 0) return 0;
