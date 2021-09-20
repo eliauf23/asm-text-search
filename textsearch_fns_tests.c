@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h> // these functions may be used in the test program
-#include "textsearch_fns.h"
 #include "tctest.h"
+#include "textsearch_fns.h"
 
 typedef struct {
     const char *pandp;
@@ -12,7 +11,6 @@ typedef struct {
     const char *maxline_512;
     const char *empty;
     const char *justnewline;
-    const char *justEOF;
     const char *randomAlphanumeric;
 } TestObjs;
 
@@ -79,7 +77,7 @@ TestObjs *setup(void) {
     objs->maxline_512 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab\n";
     objs->empty = "";
     objs->justnewline = "\n";
-    objs->justEOF = EOF;
+
     objs->randomAlphanumeric =
     "itfm92jH2m9UxobL7\n"
        "38VwNhd8Fsx7tQnx7\n"
@@ -167,39 +165,50 @@ void test_count_occurrences(TestObjs *objs) {
     char bufa[MAXLINE + 1];
 
     //simple case
-    ASSERT(count_occurrences(read_line(in_1, bufa), "truth") == 1);
+    read_line(in_1, bufa);
+    ASSERT(count_occurrences(bufa, "truth") == 1);
 
     //checking case sensitivity 1
-    ASSERT(count_occurrences(read_line(in_1, bufa), "Good") == 0);
+        read_line(in_1, bufa);
+
+    ASSERT(count_occurrences(bufa, "Good") == 0);
 
     // just newline char
-    ASSERT(count_occurrences(read_line(in_1, bufa), "NA") == 0);
+        read_line(in_1, bufa);
+
+    ASSERT(count_occurrences(bufa, "NA") == 0);
 
     //ignores punctuation 
     //line reads in text "neighbourhood, this"
-    ASSERT(count_occurrences(read_line(in_1, bufa), "neighbourhood this") == 1);
+        read_line(in_1, bufa);
+
+    ASSERT(count_occurrences(bufa, "neighbourhood this") == 1);
 
     //testing multiple occurances of substrings
-    ASSERT(count_occurrences(read_line(in_1, bufa), "is") == 2);
+        read_line(in_1, bufa);
+
+    ASSERT(count_occurrences(bufa, "is") == 2);
 
     //spacing test
-    ASSERT(count_occurrences(read_line(in_1, bufa), "s o m e") == 0);
+        read_line(in_1, bufa);
+
+    ASSERT(count_occurrences(bufa, "s o m e") == 0);
     
     fclose(in_1);
 
     //testing letters after char limit
     FILE *in_2 = fmemopen((char *) objs->maxline_513, strlen(objs->maxline_513), "r");
     char bufb[MAXLINE + 1];
-
-    ASSERT(count_occurrences(read_line(in_2, bufb), "b") == 0);
+read_line(in_2, bufb);
+    ASSERT(count_occurrences(bufb, "b") == 0);
 
     fclose(in_2);
 
     //testing word that goes over the char limit
     FILE *in_3 = fmemopen((char *) objs->maxline_b, strlen(objs->maxline_b), "r");
     char bufc[MAXLINE + 1];
-
-    ASSERT(count_occurrences(read_line(in_3, bufc), "star") == 0);
+    read_line(in_3, bufc);
+    ASSERT(count_occurrences(bufc, "star") == 0);
 
     fclose(in_3);
 
