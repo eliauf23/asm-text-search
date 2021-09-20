@@ -8,8 +8,9 @@ int read_line(FILE *in, char *buf) {
     //get all characters until you encounter newline/EOF(=-1)/exceed line max
     while (c != -1 && c != '\n')
     {
+        //TODO: check to make sure we don't read memory out of bounds
         buf[index] = c;
-        if(index + 1 <= MAXLINE) {
+        if(index < MAXLINE) {
             c = fgetc(in);
             index++;
         } else break;
@@ -33,18 +34,28 @@ unsigned count_occurrences(const char *line, const char *str)
     unsigned line_total = 0;
 
     int str_len = find_string_length(str);
-    int line_len = find_string_length(line);
+    printf("\nString length of target string = %d\n", str_len);
+    //if you search for the empty string
+    if(str_len == 0) {
+        return 0;
+    }
 
+    int line_len = find_string_length(line);
+    //only count up to the 512th character, even if string is longer
     if(line_len > 512) line_len = 512;
-    
-    //TODO: make sure I'm not going out of bounds
-    int last_index = line_len - str_len + 1;
-    if (last_index == 0) return 0;
+
+    int last_index = line_len - str_len;
+
+    printf("For string \"%s\": line len - str len = last index: %d - %d = %d\n\n", str, line_len, str_len, last_index);
+
+    if (last_index < 0) return 0;
 
     for (int i = 0; i < last_index; i++) {
-        char * substr = get_substr(line, str_len, i);
+        char * substr = get_substr(line, line_len, str_len, i);
+        if(substr != NULL) {
         line_total += strings_equal(substr, str);
         free(substr);
+        }
 
     }
     return line_total;
@@ -105,6 +116,7 @@ unsigned find_all_occurrences(FILE *in, char *search, int printOccurrences)
             print_line(stdout, buf);
         }
         line_total = 0;
+        
 
        free(buf);
     }
@@ -112,8 +124,12 @@ unsigned find_all_occurrences(FILE *in, char *search, int printOccurrences)
 }
 
 
-char *get_substr(const char *line, int str_len, int i)
+char *get_substr(const char *line, int line_len, int str_len, int i)
 {
+
+    if(i > line_len || str_len > line_len) {
+        return NULL;
+    }
     
     char *substr = calloc(str_len, sizeof(char));
     for (int j = 0; j < str_len; j++)

@@ -290,17 +290,20 @@ void test_find_all_occurrences(TestObjs *objs) {
 //return # of occurences
 
 
-    FILE *in = fmemopen((char *) objs->pandp, strlen(objs->pandp), "r");
-    
-    //no printing
-
+    FILE *in;
+    in = fmemopen((char *) objs->pandp, strlen(objs->pandp), "r");
     //simple counting
     ASSERT(find_all_occurrences(in, "ma", 0) == 3);
-    
-    //many occurances 
-    ASSERT(find_all_occurrences(in, "a ", 0) == 17);
 
     fclose(in);
+
+    in = fmemopen((char *) objs->pandp, strlen(objs->pandp), "r");
+    //simple counting
+    ASSERT(find_all_occurrences(in, "a", 0) == 17);
+
+    fclose(in);
+    //many occurances 
+
 
 }
 
@@ -310,32 +313,31 @@ void test_get_substr(TestObjs *objs) {
 
     //TODO: implement
     // palindromes = "racecaracecar...."
-    ASSERT(0 == strcmp(get_substr(objs->palindromes, 3, 0), "rac"));
+    ASSERT(0 == strcmp(get_substr(objs->palindromes, strlen(objs->palindromes), 3, 0), "rac"));
 
     //first word
-    ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", 5, 0), "hello"));
+    ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", strlen("hello and welcome to the tets of this program"), 5, 0), "hello"));
 
     //last word
-    ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", 7, 38), "program"));
+    ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", strlen("hello and welcome to the tets of this program"), 7, 38), "program"));
 
     //middle world
-    ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", 3, 21), "the"));
+    ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", strlen("hello and welcome to the tets of this program"), 3, 21), "the"));
 
     //DNE
-    ASSERT(0 == strcmp(get_substr("", 1, 2 ), ""));
+    ASSERT(NULL == get_substr("", 0, 1, 2));
 
 
     //i + str_len> line_len BUT i < line_len
-    ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", 3, 43), "am"));
+    ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", strlen("hello and welcome to the tets of this program"), 3, 43), "am"));
 
     // i == line_len
-    ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", 4, 45), ""));
+    ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", strlen("hello and welcome to the tets of this program"), 4, 45), ""));
     
 
     //i = line_len + 1
     //TODO: Look at this edge case. It wraps around and prints "hello ";
-    printf("THis prints: %s :EOF\n", get_substr("hello and welcome to the tets of this program", 6, 46));
-    ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", 6, 46), ""));
+    ASSERT(get_substr("hello and welcome to the tets of this program", strlen("hello and welcome to the tets of this program"),  6, 46) == NULL);
 
 
     //i = 100
