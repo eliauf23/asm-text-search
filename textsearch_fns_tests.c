@@ -142,6 +142,8 @@ void test_read_line(TestObjs *objs) {
     ASSERT(!read_line(in, buf));
 
     fclose(in);
+
+   //TODO: add more files; 
     
 }
 
@@ -150,22 +152,13 @@ void test_print_line(TestObjs *objs) {
     //TODO: implement (print various lines print properly)
     //void print_line(FILE *out, const char *buf) {
 
-    /*char buf[4096];
-    FILE *out = fmemopen(buf, sizeof(buf), "w");
-    fprintf(out, "Hello, world\n");
-    fprintf(out, "This is some text\n");
-    fclose(out);
-
-        ASSERT(0 == strcmp(buf, "Hello, world\nThis is some text\n"));
-
-    */
 
    //simple printing test
    char buf_1[MAXLINE + 1];
    FILE *out_1 = fmemopen(buf_1, sizeof(buf_1),"w");
-
-   fclose(out_1);
+    print_line(out_1, "This is a test line. Did it work??\n");
    ASSERT(0 == strcmp(buf_1, "This is a test line. Did it work??\n"));
+   fclose(out_1);
 
 
     //print line that is greater than the maxline limit
@@ -173,11 +166,11 @@ void test_print_line(TestObjs *objs) {
     FILE *out_2 = fmemopen(buf_2, sizeof(buf_2),"w");
     
     print_line(out_2, objs->maxline_513);
-    fclose(out_2);         
     ASSERT(0 == strcmp(buf_2, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" ));
+        fclose(out_2);         
 
 
-    //only ever use it for stoud and by def not null
+    //only ever use it for stoud and by defition will never be null
 }
 
 
@@ -220,8 +213,8 @@ void test_find_string_length(TestObjs *objs) {
     ASSERT(find_string_length(objs->justnewline) == 1);
     //NOTE: This will never be passed into find_string_length because we check for newlines before calling function
 
+    //one char
     ASSERT(find_string_length(objs->single_char) == 1);
-
 
     //maxline_513 len = 513
     //we find the full length and check for >512 in other functions
@@ -284,31 +277,35 @@ void test_strings_equal(TestObjs *objs) {
     //newline char
     ASSERT(strings_equal("yXxwXcxXgkHS7Apt7\n", "yXxwXcxXgkHS7Apt7") == 0);
 
-    //ignores punctuation? TODO: Look at q 241
 }
 
 
-//TODO: implement
 void test_find_all_occurrences(TestObjs *objs) {
-//unsigned find_all_occurrences(FILE *in, char *search, int printOccurrences)
-//int printOccurences = 0 don't print, 1 == print
-//return # of occurences
 
-
+    //NO PRINTING OCCURANCES
+    //simple counting 1
     FILE *in;
     in = fmemopen((char *) objs->pandp, strlen(objs->pandp), "r");
-    //simple counting
     ASSERT(find_all_occurrences(in, "ma", 0) == 3);
 
     fclose(in);
 
-    in = fmemopen((char *) objs->pandp, strlen(objs->pandp), "r");
-    //simple counting
+    //simple counting 2
     ASSERT(find_all_occurrences(in, "a", 0) == 17);
 
-    fclose(in);
-    //many occurances 
+    //no occurances
+    ASSERT(find_all_occurrences(in, "peanutbutter", 0) == 0);
 
+
+
+    //PRINTING OCCURANCES
+    //simple counting 1 
+    ASSERT(find_all_occurrences(in, "ma", 1) == 3);
+    //TODO: TEST IT PRINTS PROPERLY 
+
+
+
+    fclose(in);
 
 }
 
@@ -332,23 +329,14 @@ void test_get_substr(TestObjs *objs) {
     //DNE
     ASSERT(NULL == get_substr("", 0, 1, 2));
 
-
     //i + str_len> line_len BUT i < line_len
     ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", strlen("hello and welcome to the tets of this program"), 3, 43), "am"));
 
     // i == line_len
     ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", strlen("hello and welcome to the tets of this program"), 4, 45), ""));
     
-
     //i = line_len + 1
-    //TODO: Look at this edge case. It wraps around and prints "hello ";
     ASSERT(get_substr("hello and welcome to the tets of this program", strlen("hello and welcome to the tets of this program"),  6, 46) == NULL);
-
-
-    //i = 100
-
-
-
 }
 
 
