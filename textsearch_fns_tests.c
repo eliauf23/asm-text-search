@@ -150,6 +150,27 @@ void test_read_line(TestObjs *objs) {
 
 void test_print_line(TestObjs *objs) {
     //TODO: implement (print various lines print properly)
+    //void print_line(FILE *out, const char *buf) {
+
+    /*char buf[4096];
+    FILE *out = fmemopen(buf, sizeof(buf), "w");
+    fprintf(out, "Hello, world\n");
+    fprintf(out, "This is some text\n");
+    fclose(out);
+
+        ASSERT(0 == strcmp(buf, "Hello, world\nThis is some text\n"));
+
+    */
+
+   char buf[MAXLINE + 1];
+   FILE *out = fmemopen(buf, sizeof(buf),"w");
+
+   print_line(out, "This is a test line. Did it work??");
+   fclose(out);
+   printf("%s", buf);
+   ASSERT(0 == strcmp(buf, "This is a test line. Did it work??\n"));
+
+    
 
     //only ever use it for stoud and by def not null
 }
@@ -311,13 +332,13 @@ void test_get_substr(TestObjs *objs) {
     ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", 4, 45), ""));
     
 
-    //i > line_len
+    //i = line_len + 1
     //TODO: Look at this edge case. It wraps around and prints "hello ";
     printf("THis prints: %s :EOF\n", get_substr("hello and welcome to the tets of this program", 6, 46));
     ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", 6, 46), ""));
 
 
-    //i == 100
+    //i = 100
 
 
 
