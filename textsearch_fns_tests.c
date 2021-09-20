@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h> // these functions may be used in the test program
-#include "textsearch_fns.h"
 #include "tctest.h"
+#include "textsearch_fns.h"
 
 typedef struct {
     const char *pandp;
@@ -12,7 +11,6 @@ typedef struct {
     const char *maxline_512;
     const char *empty;
     const char *justnewline;
-    const char *justEOF;
     const char *randomAlphanumeric;
 } TestObjs;
 
@@ -79,7 +77,7 @@ TestObjs *setup(void) {
     objs->maxline_512 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab\n";
     objs->empty = "";
     objs->justnewline = "\n";
-    objs->justEOF = EOF;
+
     objs->randomAlphanumeric =
     "itfm92jH2m9UxobL7\n"
        "38VwNhd8Fsx7tQnx7\n"
