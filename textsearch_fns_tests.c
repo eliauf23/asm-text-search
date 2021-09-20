@@ -12,6 +12,7 @@ typedef struct {
     const char *empty;
     const char *justnewline;
     const char *randomAlphanumeric;
+    const char *single_char;
 } TestObjs;
 
 
@@ -99,7 +100,7 @@ TestObjs *setup(void) {
        "zdzTIn1zvtY40Rpb7\n"
        "JqtLoBjhcXkAjFZe7\n"
        "CPIyPXcgxZB67rpJ\n";  
-
+       objs->single_char = "z";
         return objs;
 }
 
@@ -193,6 +194,9 @@ void test_find_string_length(TestObjs *objs) {
     ASSERT(find_string_length(objs->justnewline) == 1);
     //NOTE: This will never be passed into find_string_length because we check for newlines before calling function
 
+    ASSERT(find_string_length(objs->single_char) == 1);
+
+
     //maxline_513 len = 513
     //we find the full length and check for >512 in other functions
     ASSERT(find_string_length(objs->maxline_513) == 514);
@@ -273,10 +277,7 @@ void test_find_all_occurrences(TestObjs *objs) {
     ASSERT(find_all_occurrences(in, "ma", 0) == 3);
     
     //many occurances 
-//    printf(find_all_occurrences(in, "a", 1));
-//    ASSERT(find_all_occurrences(in, "a", 0) == 17);
-
-    //printing
+    ASSERT(find_all_occurrences(in, "a ", 0) == 17);
 
     fclose(in);
 
