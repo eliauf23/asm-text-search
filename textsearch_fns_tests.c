@@ -143,14 +143,9 @@ void test_read_line(TestObjs *objs) {
     ASSERT(!read_line(in, buf));
 
     fclose(in);
-
-    //edge case return 0 if there is a next line, non zero value when you encounter EOF
-    //TODO: Make sure we get the proper return value
-
-    //TODO: empty file or just /n want to make sure returns right thing    
+    
 }
 
-// TODO: implementations of other test functions
 
 void test_print_line(TestObjs *objs) {
     //TODO: implement (print various lines print properly)
@@ -185,9 +180,6 @@ void test_count_occurrences(TestObjs *objs) {
 
     //testing word that overflows over the char limit
     ASSERT(count_occurrences(objs->maxline_over, "star") == 0);
-
-   
-    //3-4 random cases with the alphanumeric
 
 }
 
@@ -292,9 +284,13 @@ void test_find_all_occurrences(TestObjs *objs) {
 
 
 void test_get_substr(TestObjs *objs) {
+    //char *get_substr(const char *line, int str_len, int i)
+
     //TODO: implement
     //pre/sufix, try accessing out of bounds in memory
     //str  abc from word dcabc starting at b 
+
+
 
 }
 
