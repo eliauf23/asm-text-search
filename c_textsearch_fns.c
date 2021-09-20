@@ -6,10 +6,13 @@ int read_line(FILE *in, char *buf) {
     int index = 0;
     char c = fgetc(in);
     //get all characters until you encounter newline/EOF(=-1)/exceed line max
-    while (c != -1 && c != '\n' && index < MAXLINE)
+    while (c != -1 && c != '\n')
     {
-        buf[index++] = c;
-        c = fgetc(in);
+        buf[index] = c;
+        if(index + 1 < MAXLINE) {
+            c = fgetc(in);
+            index++;
+        } else break;
     }
     //null terminate buffer - even if index = 511 == MAXLINE, not out of bounds
     buf[index] = '\0';
@@ -88,7 +91,8 @@ unsigned find_all_occurrences(FILE *in, char *search, int printOccurrences)
     unsigned line_total = 0;
     while (has_next_line)
     {
-        char *buf = calloc(512, sizeof(char));
+        char *buf = calloc(513, sizeof(char));
+        buf[512] = '\0'; 
         //have already checked that in can be opened
         has_next_line = read_line(in, buf); //will be 0 if EOF is encountered
         line_total = count_occurrences(buf, search);
