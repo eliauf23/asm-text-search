@@ -174,7 +174,7 @@ void test_count_occurrences(TestObjs *objs) {
 
     //ignores punctuation 
     //line reads in text "neighbourhood, this"
-    ASSERT(count_occurrences("on his first entering a neighbourhood, this truth is so well", "neighbourhood this") == 1);
+    ASSERT(count_occurrences("on his first entering a neighbourhood, this truth is so well", "neighbourhood, this") == 1);
 
     //testing multiple occurances of substrings
     ASSERT(count_occurrences("fixed in the minds of the surrounding families, that he is", "in") == 2);
@@ -264,7 +264,7 @@ void test_strings_equal(TestObjs *objs) {
     //newline char
     ASSERT(strings_equal("yXxwXcxXgkHS7Apt7\n", "yXxwXcxXgkHS7Apt7") == 0);
 
-    //ignores punctuation
+    //ignores punctuation? TODO: Look at q 241
 }
 
 
@@ -278,16 +278,17 @@ void test_find_all_occurrences(TestObjs *objs) {
     FILE *in = fmemopen((char *) objs->pandp, strlen(objs->pandp), "r");
     
     //no printing
+
+    //simple counting
     ASSERT(find_all_occurrences(in, "ma", 0) == 3);
     
-
-
+    //many occurances 
+    ASSERT(find_all_occurrences(in, "a", 1) == 17);
 
     //printing
 
     fclose(in);
-    //pass output, and string and make sure printing is working
-    //
+
 }
 
 
