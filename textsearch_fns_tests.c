@@ -8,7 +8,7 @@ typedef struct {
     const char *pandp;
     const char *palindromes;
     const char *maxline_513;
-    const char *maxline_b;
+    const char *maxline_over;
     const char *maxline_512;
     const char *empty;
     const char *justnewline;
@@ -74,7 +74,7 @@ TestObjs *setup(void) {
     //512 a's followed by 1 b and \n
     objs->maxline_513 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab\n";
     //515 chars
-    objs->maxline_b = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaastar\n";
+    objs->maxline_over = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaastar\n";
     //510 chars and \n
     objs->maxline_512 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab\n";
     objs->empty = "";
@@ -163,48 +163,34 @@ void test_print_line(TestObjs *objs) {
 
 void test_count_occurrences(TestObjs *objs) {
 
-    FILE *in_1 = fmemopen((char *) objs->pandp, strlen(objs->pandp), "r");
-    char bufa[MAXLINE + 1];
-
     //simple case
-    ASSERT(count_occurrences(read_line(in_1, bufa), "truth") == 1);
+    ASSERT(count_occurrences("It is a truth universally acknowledged, that a single man in", "truth") == 1);
 
     //checking case sensitivity 1
-    ASSERT(count_occurrences(read_line(in_1, bufa), "Good") == 0);
+    ASSERT(count_occurrences("possession of a good fortune, must be in want of a wife.", "Good") == 0);
 
     // just newline char
-    ASSERT(count_occurrences(read_line(in_1, bufa), "NA") == 0);
+    ASSERT(count_occurrences("\n", "NA") == 0);
 
     //ignores punctuation 
     //line reads in text "neighbourhood, this"
-    ASSERT(count_occurrences(read_line(in_1, bufa), "neighbourhood this") == 1);
+    ASSERT(count_occurrences("on his first entering a neighbourhood, this truth is so well", "neighbourhood this") == 1);
 
     //testing multiple occurances of substrings
-    ASSERT(count_occurrences(read_line(in_1, bufa), "is") == 2);
+    ASSERT(count_occurrences("fixed in the minds of the surrounding families, that he is", "in") == 2);
 
     //spacing test
-    ASSERT(count_occurrences(read_line(in_1, bufa), "s o m e") == 0);
+    ASSERT(count_occurrences("considered as the rightful property of some one or other of their", "s o m e") == 0);
     
-    fclose(in_1);
 
     //testing letters after char limit
-    FILE *in_2 = fmemopen((char *) objs->maxline_513, strlen(objs->maxline_513), "r");
-    char bufb[MAXLINE + 1];
+    ASSERT(count_occurrences(objs->maxline_513, "b") == 0);
 
-    ASSERT(count_occurrences(read_line(in_2, bufb), "b") == 0);
 
-    fclose(in_2);
-
-    //testing word that goes over the char limit
-    FILE *in_3 = fmemopen((char *) objs->maxline_b, strlen(objs->maxline_b), "r");
-    char bufc[MAXLINE + 1];
-
-    ASSERT(count_occurrences(read_line(in_3, bufc), "star") == 0);
-
-    fclose(in_3);
+    //testing word that overflows over the char limit
+    ASSERT(count_occurrences(objs->maxline_over, "star") == 0);
 
    
-    //TODO: MAXLINE (right before char, after max line char)
     //3-4 random cases with the alphanumeric
 
 }
@@ -246,6 +232,15 @@ void test_starts_with(TestObjs *objs) {
 
     //words are equal
     ASSERT(starts_with("word", "word") == 1);
+
+    //empty prefix
+    ASSERT(starts_with("summer nights", "") == 1);
+
+    //empty word
+    ASSERT(starts_with("", "summer") == 0);
+
+    //check with two words
+    ASSERT(starts_with("summer nights", "summer") == 1);
     
 }
 
@@ -267,24 +262,30 @@ void test_strings_equal(TestObjs *objs) {
     ASSERT(strings_equal("welcome", "wel come") == 0);
 
     //newline char
-    ASSERT(strings_equal("yXxwXcxXgkHS7Apt7\n", "yXxwXcxXgkHS7Apt7") == 1);
+    ASSERT(strings_equal("yXxwXcxXgkHS7Apt7\n", "yXxwXcxXgkHS7Apt7") == 0);
+
+    //ignores punctuation
 }
 
+
+//TODO: implement
 void test_find_all_occurrences(TestObjs *objs) {
 //unsigned find_all_occurrences(FILE *in, char *search, int printOccurrences)
 //int printOccurences = 0 don't print, 1 == print
 //return # of occurences
-    FILE *in = fmemopen((char *) objs->pandp, strlen(objs->pandp), "r");
 
-    //no printing
-    ASSERT(find_all_occurrences(in, "we", 0) == 3);
+
+    FILE *in = fmemopen((char *) objs->pandp, strlen(objs->pandp), "r");
     
+    //no printing
+    ASSERT(find_all_occurrences(in, "ma", 0) == 3);
+    
+
 
 
     //printing
 
     fclose(in);
-    //TODO: implement
     //pass output, and string and make sure printing is working
     //
 }
