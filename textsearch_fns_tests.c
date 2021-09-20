@@ -199,7 +199,8 @@ void test_find_string_length(TestObjs *objs) {
     ASSERT(find_string_length(objs->empty) == 0);
 
     //new line
-    ASSERT(find_string_length(objs->justnewline) == 0);
+    ASSERT(find_string_length(objs->justnewline) == 1);
+    //NOTE: This will never be passed into find_string_length because we check for newlines before calling function
 
     //maxline_513 len = 513
     ASSERT(find_string_length(objs->maxline_513) == 512);
