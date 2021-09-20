@@ -111,6 +111,6 @@ unsigned find_all_occurrences(FILE* in, char* search, int printOccurrences);
  *   dynamically allocated character array with substring
  */
 
-char *get_substr(const char *line, int str_len, int i);
+char *get_substr(const char *line, int line_len, int str_len, int i);
 
 #endif // TEXTSEARCH_FNS_H

@@ -51,9 +51,12 @@ unsigned count_occurrences(const char *line, const char *str)
     if (last_index < 0) return 0;
 
     for (int i = 0; i < last_index; i++) {
-        char * substr = get_substr(line, str_len, i);
+        char * substr = get_substr(line, line_len, str_len, i);
+        if(substr != NULL) {
         line_total += strings_equal(substr, str);
         free(substr);
+        }
+
     }
     return line_total;
 }
@@ -121,8 +124,12 @@ unsigned find_all_occurrences(FILE *in, char *search, int printOccurrences)
 }
 
 
-char *get_substr(const char *line, int str_len, int i)
+char *get_substr(const char *line, int line_len, int str_len, int i)
 {
+
+    if(i > line_len || str_len > line_len) {
+        return NULL;
+    }
     
     char *substr = calloc(str_len, sizeof(char));
     for (int j = 0; j < str_len; j++)
