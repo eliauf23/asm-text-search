@@ -277,17 +277,20 @@ void test_find_all_occurrences(TestObjs *objs) {
 //return # of occurences
 
 
-    FILE *in = fmemopen((char *) objs->pandp, strlen(objs->pandp), "r");
-    
-    //no printing
-
+    FILE *in;
+    in = fmemopen((char *) objs->pandp, strlen(objs->pandp), "r");
     //simple counting
     ASSERT(find_all_occurrences(in, "ma", 0) == 3);
-    
-    //many occurances 
-    ASSERT(find_all_occurrences(in, "a ", 0) == 17);
 
     fclose(in);
+
+    in = fmemopen((char *) objs->pandp, strlen(objs->pandp), "r");
+    //simple counting
+    ASSERT(find_all_occurrences(in, "a", 0) == 17);
+
+    fclose(in);
+    //many occurances 
+
 
 }
 
