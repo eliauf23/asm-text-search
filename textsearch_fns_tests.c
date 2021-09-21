@@ -149,26 +149,40 @@ void test_read_line(TestObjs *objs) {
 
 
 void test_print_line(TestObjs *objs) {
-    //TODO: implement (print various lines print properly)
     //void print_line(FILE *out, const char *buf) {
 
 
    //simple printing test
    char buf_1[MAXLINE + 1];
    FILE *out_1 = fmemopen(buf_1, sizeof(buf_1),"w");
-    print_line(out_1, "This is a test line. Did it work??\n");
-   ASSERT(0 == strcmp(buf_1, "This is a test line. Did it work??\n"));
+   print_line(out_1, "This is a test line. Did it work??");
+   ASSERT(0 == strcmp(buf_1, "This is a test line. Did it work??"));
    fclose(out_1);
 
 
     //print line that is greater than the maxline limit
     char buf_2[MAXLINE + 1];
     FILE *out_2 = fmemopen(buf_2, sizeof(buf_2),"w");
-    
     print_line(out_2, objs->maxline_513);
     ASSERT(0 == strcmp(buf_2, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" ));
-        fclose(out_2);         
+    fclose(out_2);         
 
+
+    //doesn't print to null out
+    //TODO: Does buf_3 = null or just empty?
+    char buf_3[MAXLINE + 1];
+    FILE *out_3;
+    print_line(out_3, objs->palindromes);
+    ASSERT(buf_3 == NULL);
+    fclose(out_3);
+
+
+    //pass in PandP
+    char buf_4[MAXLINE + 1];
+    FILE *out_4 = fmemopen(buf_4, sizeof(buf_4), 'w');
+    print_line(out_4, objs->pandp);
+    ASSERT(0 == strcmp(buf_4, "It is a truth universally acknowledged, that a single man in\n"));
+    fclose(out_4);
 
     //only ever use it for stoud and by defition will never be null
 }
@@ -281,31 +295,38 @@ void test_strings_equal(TestObjs *objs) {
 
 
 void test_find_all_occurrences(TestObjs *objs) {
+    //uses printlnine to print when printOccurances=1
+    //SO no need to test printing occurances.
 
-    //NO PRINTING OCCURANCES
+
     //simple counting 1
     FILE *in;
     in = fmemopen((char *) objs->pandp, strlen(objs->pandp), "r");
     ASSERT(find_all_occurrences(in, "ma", 0) == 3);
 
-    fclose(in);
-
     //simple counting 2
-    ASSERT(find_all_occurrences(in, "a", 0) == 17);
+    //ASSERT(find_all_occurrences(in, "a", 0) == 17);
 
     //no occurances
     ASSERT(find_all_occurrences(in, "peanutbutter", 0) == 0);
-
-
-
-    //PRINTING OCCURANCES
-    //simple counting 1 
-    ASSERT(find_all_occurrences(in, "ma", 1) == 3);
-    //TODO: TEST IT PRINTS PROPERLY 
-
-
-
+    
     fclose(in);
+
+    FILE *in_2;
+    in_2 = fmemopen((char *) objs->maxline_513, strlen(objs->maxline_513), 'r');
+    
+    //occurance after the maxline
+    ASSERT(find_all_occurrences(in_2,"b", 0) == 0);
+
+    fclose(in_2);
+
+    FILE *in_3;
+    in_3 = fmemopen((char *) objs->maxline_over, strlen(objs->maxline_over), 'r');
+
+    ASSERT(find_all_occurrences(in_3, "star", 0 ) == 0);
+
+    fclose(in_3);
+    
 
 }
 
