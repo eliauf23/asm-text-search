@@ -23,8 +23,8 @@ void test_read_line(TestObjs *objs);
 void test_print_line(TestObjs *objs);
 void test_count_occurrences(TestObjs *objs);
 void test_find_string_length(TestObjs *objs);
-void test_starts_with(TestObjs *objs);
-void test_strings_equal(TestObjs *objs);
+void test_starts_with();
+void test_strings_equal();
 void test_find_all_occurrences(TestObjs *objs);
 void test_get_substr(TestObjs *objs);
 
@@ -171,7 +171,7 @@ void test_print_line(TestObjs *objs) {
     //doesn't print to null out
     //TODO: Does buf_3 = null or just empty?
     char buf_3[MAXLINE + 1];
-    FILE *out_3;
+    FILE *out_3 = NULL;
     print_line(out_3, objs->palindromes);
     ASSERT(buf_3 == NULL);
     fclose(out_3);
@@ -179,7 +179,8 @@ void test_print_line(TestObjs *objs) {
 
     //pass in PandP
     char buf_4[MAXLINE + 1];
-    FILE *out_4 = fmemopen(buf_4, sizeof(buf_4), 'w');
+
+    FILE *out_4 = fmemopen((char *) buf_4, sizeof(buf_4), "w");
     print_line(out_4, objs->pandp);
     ASSERT(0 == strcmp(buf_4, "It is a truth universally acknowledged, that a single man in\n"));
     fclose(out_4);
@@ -246,7 +247,7 @@ void test_find_string_length(TestObjs *objs) {
 }
 
 
-void test_starts_with(TestObjs *objs) {
+void test_starts_with() {
 
     //simple true check
     ASSERT(starts_with("wordalala", "wor") == 1);
@@ -272,7 +273,7 @@ void test_starts_with(TestObjs *objs) {
 }
 
 
-void test_strings_equal(TestObjs *objs) {
+void test_strings_equal() {
 //int strings_equal(const char *s1, const char *s2)
 // 1 = true, 0 = false
 
@@ -313,7 +314,7 @@ void test_find_all_occurrences(TestObjs *objs) {
     fclose(in);
 
     FILE *in_2;
-    in_2 = fmemopen((char *) objs->maxline_513, strlen(objs->maxline_513), 'r');
+    in_2 = fmemopen((char *) objs->maxline_513, strlen(objs->maxline_513), "r");
     
     //occurance after the maxline
     ASSERT(find_all_occurrences(in_2,"b", 0) == 0);
@@ -321,7 +322,7 @@ void test_find_all_occurrences(TestObjs *objs) {
     fclose(in_2);
 
     FILE *in_3;
-    in_3 = fmemopen((char *) objs->maxline_over, strlen(objs->maxline_over), 'r');
+    in_3 = fmemopen((char *) objs->maxline_over, strlen(objs->maxline_over), "r");
 
     ASSERT(find_all_occurrences(in_3, "star", 0 ) == 0);
 

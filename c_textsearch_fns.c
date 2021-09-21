@@ -34,7 +34,7 @@ unsigned count_occurrences(const char *line, const char *str)
     unsigned line_total = 0;
 
     int str_len = find_string_length(str);
-    printf("\nString length of target string = %d\n", str_len);
+   // printf("\nString length of target string = %d\n", str_len);
     //if you search for the empty string
     if(str_len == 0) {
         return 0;
@@ -46,7 +46,7 @@ unsigned count_occurrences(const char *line, const char *str)
 
     int last_index = line_len - str_len;
 
-    printf("For string \"%s\": line len - str len = last index: %d - %d = %d\n\n", str, line_len, str_len, last_index);
+   // printf("For string \"%s\": line len - str len = last index: %d - %d = %d\n\n", str, line_len, str_len, last_index);
 
     if (last_index < 0) return 0;
 
