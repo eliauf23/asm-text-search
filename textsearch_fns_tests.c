@@ -300,9 +300,10 @@ void test_find_all_occurrences(TestObjs *objs) {
     //SO no need to test printing occurances.
 
 
-    //simple counting 1
     FILE *in;
     in = fmemopen((char *) objs->pandp, strlen(objs->pandp), "r");
+    
+    //simple counting 1
     ASSERT(find_all_occurrences(in, "ma", 0) == 3);
 
     //simple counting 2
