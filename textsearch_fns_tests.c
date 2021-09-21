@@ -155,16 +155,16 @@ void test_print_line(TestObjs *objs) {
    FILE *out_1 = fmemopen(buf_1, 513,"rw");
    char *test_str = "This is a test line. \nDid it work??";
     print_line(out_1, test_str);
-char c = fgetc(out_1);
+    char c = fgetc(out_1);
 
-unsigned str_index = 0;
-while (c != EOF && str_index < strlen(test_str)) {
-    printf("\n%c ==? teststr[%d] %c \n", c, str_index, test_str[str_index]);
+    unsigned str_index = 0;
+    while (c != EOF && str_index < strlen(test_str)) {
+        printf("\n%c ==? teststr[%d] %c \n", c, str_index, test_str[str_index]);
 
-    ASSERT(c == test_str[str_index]);
-    str_index++;
-    c = fgetc(out_1);
-}
+        ASSERT(c == test_str[str_index]);
+        str_index++;
+        c = fgetc(out_1);
+    }
    fclose(out_1);
 
 
