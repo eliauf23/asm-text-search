@@ -105,7 +105,7 @@ unsigned find_all_occurrences(FILE *in, char *search, int printOccurrences)
     unsigned line_total = 0;
     while (has_next_line)
     {
-        char *buf = calloc(MAXLINE+1, sizeof(char));
+        char buf[MAXLINE + 1];
         buf[MAXLINE] = '\0'; 
         //have already checked that in can be opened
         has_next_line = read_line(in, buf); //will be 0 if EOF is encountered
@@ -118,7 +118,6 @@ unsigned find_all_occurrences(FILE *in, char *search, int printOccurrences)
         line_total = 0;
         
 
-       free(buf);
     }
     return num_occurrences;
 }
