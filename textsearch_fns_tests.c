@@ -149,20 +149,28 @@ void test_read_line(TestObjs *objs) {
 
 
 void test_print_line(TestObjs *objs) {
-    //void print_line(FILE *out, const char *buf) {
-
 
    //simple printing test
-   char buf_1[MAXLINE + 1];
-   FILE *out_1 = fmemopen(buf_1, sizeof(buf_1),"w");
-   print_line(out_1, "This is a test line. Did it work??");
-   ASSERT(0 == strcmp(buf_1, "This is a test line. Did it work??"));
+   char buf_1[MAXLINE+1];
+   FILE *out_1 = fmemopen(buf_1, 513,"rw");
+   char *test_str = "This is a test line. \nDid it work??";
+    print_line(out_1, test_str);
+char c = fgetc(out_1);
+
+unsigned str_index = 0;
+while (c != EOF && str_index < strlen(test_str)) {
+    printf("\n%c ==? teststr[%d] %c \n", c, str_index, test_str[str_index]);
+
+    ASSERT(c == test_str[str_index]);
+    str_index++;
+    c = fgetc(out_1);
+}
    fclose(out_1);
 
 
     //print line that is greater than the maxline limit
     char buf_2[MAXLINE + 1];
-    FILE *out_2 = fmemopen(buf_2, sizeof(buf_2),"w");
+    FILE *out_2 = fmemopen(buf_2, strlen(buf_2),"w");
     print_line(out_2, objs->maxline_513);
     ASSERT(0 == strcmp(buf_2, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" ));
     fclose(out_2);         
@@ -180,7 +188,7 @@ void test_print_line(TestObjs *objs) {
     //pass in PandP
     char buf_4[MAXLINE + 1];
 
-    FILE *out_4 = fmemopen((char *) buf_4, sizeof(buf_4), "w");
+    FILE *out_4 = fmemopen((char *) buf_4, strlen(buf_4), "w");
     print_line(out_4, objs->pandp);
     ASSERT(0 == strcmp(buf_4, "It is a truth universally acknowledged, that a single man in\n"));
     fclose(out_4);
