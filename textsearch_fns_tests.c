@@ -3,7 +3,8 @@
 #include "tctest.h"
 #include "textsearch_fns.h"
 
-typedef struct {
+typedef struct
+{
     const char *pandp;
     const char *palindromes;
     const char *maxline_513;
@@ -13,8 +14,8 @@ typedef struct {
     const char *justnewline;
     const char *randomAlphanumeric;
     const char *single_char;
+    const char *test_str;
 } TestObjs;
-
 
 TestObjs *setup(void);
 void cleanup(TestObjs *objs);
@@ -28,15 +29,16 @@ void test_strings_equal();
 void test_find_all_occurrences(TestObjs *objs);
 void test_get_substr(TestObjs *objs);
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
     // Allow the name of the test function to execute to be specified
     // on the command line
-    if (argc > 1) {
+    if (argc > 1)
+    {
         tctest_testname_to_execute = argv[1];
     }
 
     TEST_INIT();
-
 
     TEST(test_read_line);
     TEST(test_print_line);
@@ -47,14 +49,13 @@ int main(int argc, char **argv) {
     TEST(test_find_all_occurrences);
     TEST(test_get_substr);
 
-
     TEST_FINI();
 
     return 0;
 }
 
-
-TestObjs *setup(void) {
+TestObjs *setup(void)
+{
     TestObjs *objs = malloc(sizeof(TestObjs));
 
     objs->pandp =
@@ -78,40 +79,44 @@ TestObjs *setup(void) {
     objs->justnewline = "\n";
 
     objs->randomAlphanumeric =
-    "itfm92jH2m9UxobL7\n"
-       "38VwNhd8Fsx7tQnx7\n"
-       "tnlUIHoaNL08hxEa7\n"
-       "12KSL9o5ZiZHV3uI7\n"
-       "T9BnNTzApkWWmpl47\n"
-       "DnieX417IjGr5Q1a7\n"
-       "uFkxxqoU0i6PZwVw7\n"
-       "7FzAE5N3favxZ7TM7\n"
-       "tiv0oiBjRqybLojc7\n"
-       "yXxwXcxXgkHS7Apt7\n"
-       "NTc4XjrOXOHp6qj87\n"
-       "yKfHUgqmwcPOmKn17\n"
-       "nb2ujNFZLVGW60kH7\n"
-       "eZfpjnr4Z88a7WEd7\n"
-       "5oFa2UkgNLD8dBSf7\n"
-       "LSyzDoROjNrVa6pz7\n"
-       "sr9rr7GwJ3d64Kvi7\n"
-       "zdzTIn1zvtY40Rpb7\n"
-       "JqtLoBjhcXkAjFZe7\n"
-       "CPIyPXcgxZB67rpJ\n";  
-       objs->single_char = "z";
-        return objs;
+        "itfm92jH2m9UxobL7\n"
+        "38VwNhd8Fsx7tQnx7\n"
+        "tnlUIHoaNL08hxEa7\n"
+        "12KSL9o5ZiZHV3uI7\n"
+        "T9BnNTzApkWWmpl47\n"
+        "DnieX417IjGr5Q1a7\n"
+        "uFkxxqoU0i6PZwVw7\n"
+        "7FzAE5N3favxZ7TM7\n"
+        "tiv0oiBjRqybLojc7\n"
+        "yXxwXcxXgkHS7Apt7\n"
+        "NTc4XjrOXOHp6qj87\n"
+        "yKfHUgqmwcPOmKn17\n"
+        "nb2ujNFZLVGW60kH7\n"
+        "eZfpjnr4Z88a7WEd7\n"
+        "5oFa2UkgNLD8dBSf7\n"
+        "LSyzDoROjNrVa6pz7\n"
+        "sr9rr7GwJ3d64Kvi7\n"
+        "zdzTIn1zvtY40Rpb7\n"
+        "JqtLoBjhcXkAjFZe7\n"
+        "CPIyPXcgxZB67rpJ\n";
+    objs->single_char = "z";
+    objs->test_str = "This is a test line. \nDid it work??";
+
+    return objs;
 }
 
-void cleanup(TestObjs *objs) {
+void cleanup(TestObjs *objs)
+{
     free(objs);
 }
 
 // An example test function
 
-void test_read_line(TestObjs *objs) {
+void test_read_line(TestObjs *objs)
+{
     // the fmemopen function allows us to treat a character string
     // as an input file
-    FILE *in = fmemopen((char *) objs->pandp, strlen(objs->pandp), "r");
+    FILE *in = fmemopen((char *)objs->pandp, strlen(objs->pandp), "r");
     char buf[MAXLINE + 1];
 
     ASSERT(read_line(in, buf));
@@ -143,61 +148,88 @@ void test_read_line(TestObjs *objs) {
 
     fclose(in);
 
-   //TODO: add more files; 
+    //TODO: add more files;
+}
+
+void test_print_line(TestObjs *objs)
+{
+
+
+    //simple printing test
+    char buf_1[MAXLINE + 1];
+    FILE *out_1 = fmemopen(buf_1, 513, "w");
     
-}
+    print_line(out_1, (char*)objs->test_str);
 
+    unsigned str_index = 0;        
+    char c = fgetc(out_1);
 
-void test_print_line(TestObjs *objs) {
+    while (c != EOF && str_index < strlen(objs->test_str))
 
-   //simple printing test
-   char buf_1[MAXLINE+1];
-   FILE *out_1 = fmemopen(buf_1, 513,"rw");
-   char *test_str = "This is a test line. \nDid it work??";
-    print_line(out_1, test_str);
-char c = fgetc(out_1);
+    {
 
-unsigned str_index = 0;
-while (c != EOF && str_index < strlen(test_str)) {
-    printf("\n%c ==? teststr[%d] %c \n", c, str_index, test_str[str_index]);
-
-    ASSERT(c == test_str[str_index]);
-    str_index++;
-    c = fgetc(out_1);
-}
-   fclose(out_1);
-
+        ASSERT(c == objs->test_str[str_index]);
+        str_index++;
+        c = fgetc(out_1);
+    }
+    fclose(out_1);
 
     //print line that is greater than the maxline limit
     char buf_2[MAXLINE + 1];
-    FILE *out_2 = fmemopen(buf_2, strlen(buf_2),"w");
+    FILE *out_2 = fmemopen(buf_2, strlen(buf_2), "w");
     print_line(out_2, objs->maxline_513);
-    ASSERT(0 == strcmp(buf_2, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" ));
-    fclose(out_2);         
+    char * expected_str = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
 
-    //doesn't print to null out
+    str_index = 0;        
+    c = fgetc(out_2);
+
+    while (c != EOF && str_index < strlen(expected_str))
+
+    {
+
+        ASSERT(c == expected_str[str_index]);
+        str_index++;
+        c = fgetc(out_2);
+    }
+
+    fclose(out_2);
+
+    /* //doesn't print to null out
     //TODO: Does buf_3 = null or just empty?
     char buf_3[MAXLINE + 1];
     FILE *out_3 = NULL;
     print_line(out_3, objs->palindromes);
     ASSERT(buf_3 == NULL);
     fclose(out_3);
-
-
+ */
     //pass in PandP
     char buf_4[MAXLINE + 1];
 
-    FILE *out_4 = fmemopen((char *) buf_4, strlen(buf_4), "w");
+    FILE *out_4 = fmemopen((char *)buf_4, strlen(buf_4), "w");
     print_line(out_4, objs->pandp);
-    ASSERT(0 == strcmp(buf_4, "It is a truth universally acknowledged, that a single man in\n"));
+    expected_str = "It is a truth universally acknowledged, that a single man in\n";
+
+
+    str_index = 0;        
+    c = fgetc(out_4);
+
+    while (c != EOF && str_index < strlen(expected_str))
+
+    {
+
+        ASSERT(c == expected_str[str_index]);
+        str_index++;
+        c = fgetc(out_4);
+    }
+
     fclose(out_4);
 
     //only ever use it for stoud and by defition will never be null
 }
 
-
-void test_count_occurrences(TestObjs *objs) {
+void test_count_occurrences(TestObjs *objs)
+{
 
     //simple case
     ASSERT(count_occurrences("It is a truth universally acknowledged, that a single man in", "truth") == 1);
@@ -208,7 +240,7 @@ void test_count_occurrences(TestObjs *objs) {
     // just newline char
     ASSERT(count_occurrences("\n", "NA") == 0);
 
-    //ignores punctuation 
+    //ignores punctuation
     //line reads in text "neighbourhood, this"
     ASSERT(count_occurrences("on his first entering a neighbourhood, this truth is so well", "neighbourhood, this") == 1);
 
@@ -223,11 +255,10 @@ void test_count_occurrences(TestObjs *objs) {
 
     //testing word that overflows over the char limit
     ASSERT(count_occurrences(objs->maxline_over, "star") == 0);
-
 }
 
-
-void test_find_string_length(TestObjs *objs) {
+void test_find_string_length(TestObjs *objs)
+{
 
     // empty string
     ASSERT(find_string_length(objs->empty) == 0);
@@ -251,11 +282,10 @@ void test_find_string_length(TestObjs *objs) {
 
     //line from pandp
     ASSERT(find_string_length("considered as the rightful property of some one or other of their\n") == 66);
-
 }
 
-
-void test_starts_with() {
+void test_starts_with()
+{
 
     //simple true check
     ASSERT(starts_with("wordalala", "wor") == 1);
@@ -277,13 +307,12 @@ void test_starts_with() {
 
     //check with two words
     ASSERT(starts_with("summer nights", "summer") == 1);
-    
 }
 
-
-void test_strings_equal() {
-//int strings_equal(const char *s1, const char *s2)
-// 1 = true, 0 = false
+void test_strings_equal()
+{
+    //int strings_equal(const char *s1, const char *s2)
+    // 1 = true, 0 = false
 
     //simple true
     ASSERT(strings_equal("abc", "abc") == 1);
@@ -299,18 +328,16 @@ void test_strings_equal() {
 
     //newline char
     ASSERT(strings_equal("yXxwXcxXgkHS7Apt7\n", "yXxwXcxXgkHS7Apt7") == 0);
-
 }
 
-
-void test_find_all_occurrences(TestObjs *objs) {
+void test_find_all_occurrences(TestObjs *objs)
+{
     //uses printlnine to print when printOccurances=1
     //SO no need to test printing occurances.
 
-
     //simple counting 1
     FILE *in;
-    in = fmemopen((char *) objs->pandp, strlen(objs->pandp), "r");
+    in = fmemopen((char *)objs->pandp, strlen(objs->pandp), "r");
     ASSERT(find_all_occurrences(in, "ma", 0) == 3);
 
     //simple counting 2
@@ -318,29 +345,27 @@ void test_find_all_occurrences(TestObjs *objs) {
 
     //no occurances
     ASSERT(find_all_occurrences(in, "peanutbutter", 0) == 0);
-    
+
     fclose(in);
 
     FILE *in_2;
-    in_2 = fmemopen((char *) objs->maxline_513, strlen(objs->maxline_513), "r");
-    
+    in_2 = fmemopen((char *)objs->maxline_513, strlen(objs->maxline_513), "r");
+
     //occurance after the maxline
-    ASSERT(find_all_occurrences(in_2,"b", 0) == 0);
+    ASSERT(find_all_occurrences(in_2, "b", 0) == 0);
 
     fclose(in_2);
 
     FILE *in_3;
-    in_3 = fmemopen((char *) objs->maxline_over, strlen(objs->maxline_over), "r");
+    in_3 = fmemopen((char *)objs->maxline_over, strlen(objs->maxline_over), "r");
 
-    ASSERT(find_all_occurrences(in_3, "star", 0 ) == 0);
+    ASSERT(find_all_occurrences(in_3, "star", 0) == 0);
 
     fclose(in_3);
-    
-
 }
 
-
-void test_get_substr(TestObjs *objs) {
+void test_get_substr(TestObjs *objs)
+{
     //char *get_substr(const char *line, int str_len, int i)
 
     //TODO: implement
@@ -364,11 +389,7 @@ void test_get_substr(TestObjs *objs) {
 
     // i == line_len
     ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", strlen("hello and welcome to the tets of this program"), 4, 45), ""));
-    
+
     //i = line_len + 1
-    ASSERT(get_substr("hello and welcome to the tets of this program", strlen("hello and welcome to the tets of this program"),  6, 46) == NULL);
+    ASSERT(get_substr("hello and welcome to the tets of this program", strlen("hello and welcome to the tets of this program"), 6, 46) == NULL);
 }
-
-
-
-
