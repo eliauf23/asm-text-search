@@ -21,7 +21,6 @@ TestObjs *setup(void);
 void cleanup(TestObjs *objs);
 
 void test_find_string_length(TestObjs *objs);
-
 void test_strings_equal();
 
 /* void test_read_line(TestObjs *objs);
@@ -355,29 +354,23 @@ void test_find_string_length(TestObjs *objs)
 }
 
 
-void test_find_string_length(TestObjs *objs)
+void test_strings_equal()
 {
+    //int strings_equal(const char *s1, const char *s2)
+    // 1 = true, 0 = false
 
-    // empty string
-    ASSERT(find_string_length(objs->empty) == 0);
+    //simple true
+    ASSERT(strings_equal("abc", "abc") == 1);
 
-    //new line
-    ASSERT(find_string_length(objs->justnewline) == 1);
-    //NOTE: This will never be passed into find_string_length because we check for newlines before calling function
+    //simple false
+    ASSERT(strings_equal("abc", "def") == 0);
 
-    //one char
-    ASSERT(find_string_length(objs->single_char) == 1);
+    //similar strings
+    ASSERT(strings_equal("hi my name is Rosie", "hi my age is Rosie") == 0);
 
-    //maxline_513 len = 513
-    //we find the full length and check for >512 in other functions
-    ASSERT(find_string_length(objs->maxline_513) == 514);
+    //smae but w/ space
+    ASSERT(strings_equal("welcome", "wel come") == 0);
 
-    //we find the full length and check for >512 in other functions
-    ASSERT(find_string_length(objs->maxline_512) == 512);
-
-    //random
-    ASSERT(find_string_length(objs->palindromes) == 19);
-
-    //line from pandp
-    ASSERT(find_string_length("considered as the rightful property of some one or other of their\n") == 66);
+    //newline char
+    ASSERT(strings_equal("yXxwXcxXgkHS7Apt7\n", "yXxwXcxXgkHS7Apt7") == 0);
 }

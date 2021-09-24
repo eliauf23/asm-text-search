@@ -58,22 +58,26 @@ strings_equal:
 .LcompareStrLength:
 	call find_string_length     /*automatically uses arg1, s1*/
 	/* TODO: double check movzwq */
-	movzwq %rax, %r10          /*moving length of string 1 (which will always be <= 512/16 bites) to callee saved r10*/
+	movzwq %ax, %r10          /*moving length of string 1 (which will always be <= 512/16 bites) to callee saved r10*/
 	push %rdi                  /*push s1 to the top of the stack */
 	movq (%rsi), %rdi          /* store s2 in %rdi so it will be arg1 */
 	call find_string_length    /*find length of string 2 which is now stored in arg1 */
-	movzwq %rax, %r11          /*move result, length of string 2 (which will always be =< 512 / 16 bites) to calle saved r11 */
+	movzwq %ax, %r11          /*move result, length of string 2 (which will always be =< 512 / 16 bites) to calle saved r11 */
 	pop %rdi                   /*move string 1 back to %rdi*/
 	cmpq %r10, %r11 		   /*compare q bc we've movzwq both string lengths */
-	jne .LstringsEqualCompareStrLengthNotEqual /*jump to not equal condition*/
-	leaq(%rdi, %r10, 1), %r12 /*save  register value of last char in caller saved %r12*/
+	jne .LstringsEqualresultStringsNotEqual /*jump to not equal condition*/
+	leaq (%rdi, %r10, 1), %r12 /*save  register value of last char in caller saved %r12*/
 
 .LstringsEqualCompareStrContentsEqual:
 //check to make sure we haven't reached end of string 1
-	//if so, jump to end and return true
-//else: compare equality of current character
-	//if not equal jump return false
-	//increment & 
+	movq (%rdi), %r10
+	cmpq (%r12), %r10
+	je .LstringsEqualresultStringsAreEqual 	//if so, jump to end and return true
+	cmpq %rsi, %rdi //else: compare equality of current character
+	jne .LstringsEqualresultStringsNotEqual	//if not equal jump return false
+	inc %rsi	//increment & 
+	inc %rdi	//increment & 
+	jmp .LstringsEqualCompareStrContentsEqual
 	//jump top of of the current label
 
 .LstringsEqualresultStringsAreEqual:
