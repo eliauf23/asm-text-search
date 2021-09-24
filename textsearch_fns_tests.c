@@ -27,7 +27,6 @@ void test_find_string_length(TestObjs *objs);
 void test_starts_with();
 void test_strings_equal();
 void test_find_all_occurrences(TestObjs *objs);
-void test_get_substr(TestObjs *objs);
 
 int main(int argc, char **argv)
 {
@@ -47,7 +46,6 @@ int main(int argc, char **argv)
     TEST(test_starts_with);
     TEST(test_strings_equal);
     TEST(test_find_all_occurrences);
-    TEST(test_get_substr);
 
     TEST_FINI();
 
@@ -154,14 +152,13 @@ void test_read_line(TestObjs *objs)
 void test_print_line(TestObjs *objs)
 {
 
-
     //simple printing test
     char buf_1[MAXLINE + 1];
     FILE *out_1 = fmemopen(buf_1, 513, "w");
-    
-    print_line(out_1, (char*)objs->test_str);
 
-    unsigned str_index = 0;        
+    print_line(out_1, (char *)objs->test_str);
+
+    unsigned str_index = 0;
     char c = fgetc(out_1);
 
     while (c != EOF && str_index < strlen(objs->test_str))
@@ -178,10 +175,9 @@ void test_print_line(TestObjs *objs)
     char buf_2[MAXLINE + 1];
     FILE *out_2 = fmemopen(buf_2, strlen(buf_2), "w");
     print_line(out_2, objs->maxline_513);
-    char * expected_str = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    char *expected_str = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
-
-    str_index = 0;        
+    str_index = 0;
     c = fgetc(out_2);
 
     while (c != EOF && str_index < strlen(expected_str))
@@ -195,27 +191,16 @@ void test_print_line(TestObjs *objs)
 
     fclose(out_2);
 
-    /* //doesn't print to null out
-    //TODO: Does buf_3 = null or just empty?
-    char buf_3[MAXLINE + 1];
-    FILE *out_3 = NULL;
-    print_line(out_3, objs->palindromes);
-    ASSERT(buf_3 == NULL);
-    fclose(out_3);
- */
-    //pass in PandP
     char buf_4[MAXLINE + 1];
 
     FILE *out_4 = fmemopen((char *)buf_4, strlen(buf_4), "w");
     print_line(out_4, objs->pandp);
     expected_str = "It is a truth universally acknowledged, that a single man in\n";
 
-
-    str_index = 0;        
+    str_index = 0;
     c = fgetc(out_4);
 
     while (c != EOF && str_index < strlen(expected_str))
-
     {
 
         ASSERT(c == expected_str[str_index]);
@@ -338,10 +323,10 @@ void test_find_all_occurrences(TestObjs *objs)
     //simple counting 1
     FILE *in;
     in = fmemopen((char *)objs->pandp, strlen(objs->pandp), "r");
-    ASSERT(find_all_occurrences(in, "ma", 0) == 3);
-
-    //simple counting 2
-    //ASSERT(find_all_occurrences(in, "a", 0) == 17);
+    if (in != NULL)
+    {
+        ASSERT(find_all_occurrences(in, "ma", 0) == 3);
+    }
 
     //no occurances
     ASSERT(find_all_occurrences(in, "peanutbutter", 0) == 0);
@@ -362,34 +347,4 @@ void test_find_all_occurrences(TestObjs *objs)
     ASSERT(find_all_occurrences(in_3, "star", 0) == 0);
 
     fclose(in_3);
-}
-
-void test_get_substr(TestObjs *objs)
-{
-    //char *get_substr(const char *line, int str_len, int i)
-
-    //TODO: implement
-    // palindromes = "racecaracecar...."
-    ASSERT(0 == strcmp(get_substr(objs->palindromes, strlen(objs->palindromes), 3, 0), "rac"));
-
-    //first word
-    ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", strlen("hello and welcome to the tets of this program"), 5, 0), "hello"));
-
-    //last word
-    ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", strlen("hello and welcome to the tets of this program"), 7, 38), "program"));
-
-    //middle world
-    ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", strlen("hello and welcome to the tets of this program"), 3, 21), "the"));
-
-    //DNE
-    ASSERT(NULL == get_substr("", 0, 1, 2));
-
-    //i + str_len> line_len BUT i < line_len
-    ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", strlen("hello and welcome to the tets of this program"), 3, 43), "am"));
-
-    // i == line_len
-    ASSERT(0 == strcmp(get_substr("hello and welcome to the tets of this program", strlen("hello and welcome to the tets of this program"), 4, 45), ""));
-
-    //i = line_len + 1
-    ASSERT(get_substr("hello and welcome to the tets of this program", strlen("hello and welcome to the tets of this program"), 6, 46) == NULL);
 }
