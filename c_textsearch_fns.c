@@ -51,13 +51,14 @@ unsigned count_occurrences(const char *line, const char *str)
     if (last_index < 0) return 0;
 
     for (int i = 0; i < last_index; i++) {
-        char * substr = get_substr(line, line_len, str_len, i);
-        if(substr != NULL) {
-        line_total += strings_equal(substr, str);
-        free(substr);
+        char substr[MAXLINE+1];
+        for(int j = 0; j < str_len && j <= MAXLINE; j++) {
+                substr[j] = line[i + j];
         }
-
+        substr[str_len] = '\0';
+        line_total += strings_equal(substr, str);
     }
+
     return line_total;
 }
 
@@ -105,7 +106,7 @@ unsigned find_all_occurrences(FILE *in, char *search, int printOccurrences)
     unsigned line_total = 0;
     while (has_next_line)
     {
-        char *buf = calloc(MAXLINE+1, sizeof(char));
+        char buf[MAXLINE + 1];
         buf[MAXLINE] = '\0'; 
         //have already checked that in can be opened
         has_next_line = read_line(in, buf); //will be 0 if EOF is encountered
@@ -118,24 +119,6 @@ unsigned find_all_occurrences(FILE *in, char *search, int printOccurrences)
         line_total = 0;
         
 
-       free(buf);
     }
     return num_occurrences;
-}
-
-
-char *get_substr(const char *line, int line_len, int str_len, int i)
-{
-
-    if(i > line_len || str_len > line_len) {
-        return NULL;
-    }
-    
-    char *substr = calloc(str_len, sizeof(char));
-    for (int j = 0; j < str_len; j++)
-    {
-        substr[j] = line[i + j];
-    }
-
-    return substr;
 }

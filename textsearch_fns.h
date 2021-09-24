@@ -98,19 +98,4 @@ int strings_equal(const char *s1, const char *s2);
  */
 unsigned find_all_occurrences(FILE* in, char* search, int printOccurrences);
 
-/*
- * Description:
- * 
- *
- * Parameters:
- *   line - line from text file
- *   str_len - length of substring
- *   i - index that substring begins at
- *
- * Returns:
- *   dynamically allocated character array with substring
- */
-
-char *get_substr(const char *line, int line_len, int str_len, int i);
-
 #endif // TEXTSEARCH_FNS_H
