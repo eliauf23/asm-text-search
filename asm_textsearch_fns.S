@@ -48,14 +48,12 @@ find_string_length:
 	addq $8, %rsp
 	ret
 
-
 .globl strings_equal
 	
 	/*s1 stores in %rdi, s2 stored in %rsi*/
 
 strings_equal:
 	subq $8, %rsp /*align stack pointer */
-	movl $1, %eax /*set default return value to 1, true*/
 
 .LcompareStrLength:
 	call find_string_length     /*automatically uses arg1, s1*/
@@ -70,12 +68,18 @@ strings_equal:
 	jne .LstringsEqualCompareStrLengthNotEqual /*jump to not equal condition*/
 	leaq(%rdi, %r10, 1), %r12 /*save  register value of last char in caller saved %r12*/
 
-.LstringsEqualCompareStrLengthEqual
+.LstringsEqualCompareStrContentsEqual:
+//check to make sure we haven't reached end of string 1
+	//if so, jump to end and return true
+//else: compare equality of current character
+	//if not equal jump return false
+	//increment & 
+	//jump top of of the current label
 
-
-
-
-.LstringsEqualCompareStrLengthNotEqual
+.LstringsEqualresultStringsAreEqual:
+	movl $1, %eax /*set default return value to 1, true*/
+	ret
+.LstringsEqualresultStringsNotEqual:
 	movl $0, %eax /*set return value to false*/ 
 	ret 
 
