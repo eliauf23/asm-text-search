@@ -20,13 +20,15 @@ typedef struct
 TestObjs *setup(void);
 void cleanup(TestObjs *objs);
 
-void test_read_line(TestObjs *objs);
+void test_find_string_length(TestObjs *objs);
+
+/* void test_read_line(TestObjs *objs);
 void test_print_line(TestObjs *objs);
 void test_count_occurrences(TestObjs *objs);
 void test_find_string_length(TestObjs *objs);
 void test_starts_with();
 void test_strings_equal();
-void test_find_all_occurrences(TestObjs *objs);
+void test_find_all_occurrences(TestObjs *objs); */
 
 int main(int argc, char **argv)
 {
@@ -39,13 +41,15 @@ int main(int argc, char **argv)
 
     TEST_INIT();
 
-    TEST(test_read_line);
+    TEST(test_find_string_length);
+
+   /*  TEST(test_read_line);
     TEST(test_print_line);
     TEST(test_count_occurrences);
     TEST(test_find_string_length);
     TEST(test_starts_with);
     TEST(test_strings_equal);
-    TEST(test_find_all_occurrences);
+    TEST(test_find_all_occurrences); */
 
     TEST_FINI();
 
@@ -108,7 +112,7 @@ void cleanup(TestObjs *objs)
     free(objs);
 }
 
-// An example test function
+/* // An example test function
 
 void test_read_line(TestObjs *objs)
 {
@@ -347,4 +351,31 @@ void test_find_all_occurrences(TestObjs *objs)
     ASSERT(find_all_occurrences(in_3, "star", 0) == 0);
 
     fclose(in_3);
+} */
+
+void test_find_string_length(TestObjs *objs)
+{
+
+    // empty string
+    ASSERT(find_string_length(objs->empty) == 0);
+
+    //new line
+    ASSERT(find_string_length(objs->justnewline) == 1);
+    //NOTE: This will never be passed into find_string_length because we check for newlines before calling function
+
+    //one char
+    ASSERT(find_string_length(objs->single_char) == 1);
+
+    //maxline_513 len = 513
+    //we find the full length and check for >512 in other functions
+    ASSERT(find_string_length(objs->maxline_513) == 514);
+
+    //we find the full length and check for >512 in other functions
+    ASSERT(find_string_length(objs->maxline_512) == 512);
+
+    //random
+    ASSERT(find_string_length(objs->palindromes) == 19);
+
+    //line from pandp
+    ASSERT(find_string_length("considered as the rightful property of some one or other of their\n") == 66);
 }
