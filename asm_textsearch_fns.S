@@ -62,7 +62,7 @@ strings_equal:
 	pop %rdi                   /*move string 1 back to %rdi*/
 	cmpq %r10, %r11 		   /*compare q bc we've movzwq both string lengths */
 	jne .LstringsEqualCompareStrLengthNotEqual /*jump to not equal condition*/
-	jmp .LstringsEqualCompareStrLengthEqual
+	leaq(%rdi, %r10, 1), %r12 /*save  register value of last char in caller saved %r12*/
 
 .LstringsEqualCompareStrLengthEqual
 
