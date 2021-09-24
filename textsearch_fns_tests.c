@@ -186,9 +186,7 @@ void test_print_line(TestObjs *objs)
     c = fgetc(out_2);
 
     while (c != EOF && str_index < strlen(expected_str))
-
     {
-
         ASSERT(c == expected_str[str_index]);
         str_index++;
         c = fgetc(out_2);
