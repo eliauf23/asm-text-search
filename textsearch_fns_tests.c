@@ -22,12 +22,12 @@ void cleanup(TestObjs *objs);
 
 void test_find_string_length(TestObjs *objs);
 
+void test_strings_equal();
+
 /* void test_read_line(TestObjs *objs);
 void test_print_line(TestObjs *objs);
 void test_count_occurrences(TestObjs *objs);
-void test_find_string_length(TestObjs *objs);
 void test_starts_with();
-void test_strings_equal();
 void test_find_all_occurrences(TestObjs *objs); */
 
 int main(int argc, char **argv)
@@ -42,13 +42,14 @@ int main(int argc, char **argv)
     TEST_INIT();
 
     TEST(test_find_string_length);
+    TEST(test_strings_equal);
+    
+
 
    /*  TEST(test_read_line);
     TEST(test_print_line);
     TEST(test_count_occurrences);
-    TEST(test_find_string_length);
     TEST(test_starts_with);
-    TEST(test_strings_equal);
     TEST(test_find_all_occurrences); */
 
     TEST_FINI();
