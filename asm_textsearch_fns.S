@@ -30,8 +30,9 @@ find_string_length:
 
 	//check if pointer to string char == null term
 .LcheckNullTerm:
-	cmpb $0, (%rdi) /*compare 
-	je .LendOfLoop /*if pointer to string char == 0, jump to end of loop*/
+	cmpq (%rdi), $0x00
+	jae .LendOfLoop
+	/*compare je .LendOfLoop /*if pointer to string char == 0, jump to end of loop*/
 
 .LincrementLenIfValidChar:
 	cmpb $1,  (%rdi)   /* if cur char < 97, not lower case */
@@ -66,7 +67,7 @@ strings_equal:
 	pop %rdi                   /*move string 1 back to %rdi*/
 	cmpq %r10, %r11 		   /*compare q bc we've movzwq both string lengths */
 	jne .LstringsEqualresultStringsNotEqual /*jump to not equal condition*/
-	leaq (%rdi, %r10, 1), %r12 /*save  register value of last char in caller saved %r12*/
+	leaq (%rdi, %r10, 1), %r12 /*save  register value of thing after the last char in caller saved %r12*/
 
 .LstringsEqualCompareStrContentsEqual:
 //check to make sure we haven't reached end of string 1
