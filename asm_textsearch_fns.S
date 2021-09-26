@@ -30,7 +30,7 @@ find_string_length:
 
 	//check if pointer to string char == null term
 .LcheckNullTerm:
-	cmpq (%rdi), $0x00
+	cmpq (%rdi), $0
 	jae .LendOfLoop
 	/*compare je .LendOfLoop /*if pointer to string char == 0, jump to end of loop*/
 
