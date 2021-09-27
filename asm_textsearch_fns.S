@@ -57,7 +57,7 @@ strings_equal:
 	ret
 
 .LstrEq_lengthsAreEqual:
-	movl	$0, %eax			//zero out eax before entering main loop as it's being used as a counter
+	movl	$0, %eax				//zero out eax before entering main loop as it's being used as a counter
 
 .LstrEq_checkCharEq: 				//Main loop: checks each char to see if eq.
 	cmpl	%ebx, %eax				// compare ebx to eax
