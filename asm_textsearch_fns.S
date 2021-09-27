@@ -1,3 +1,5 @@
+#define MAXLINE 511
+
 /*
  * Assembly language implementations of functions declared in
  * textsearch_fns.h
@@ -5,86 +7,75 @@
 
 	.section .text 
 
-/*
- * The following is just an example of how an assembly language
- * function would be defined
- */
-	//.globl read_line
-
 .globl find_string_length
 
-	//; read_line:
-//; 	/* TODO: implementation of read_line function */
-//; 	ret
-
-
-
-
-
-
-
+/*--------BEGIN: find_string_length------------------------------------------------*/
 find_string_length:
-
-	subq $8, %rsp /* align stack pointer - restore address to multiple of 16 */
-	movl $0, %eax //will be storing length in eax register (bc its return val)
-
-	//check if pointer to string char == null term
-.LcheckNullTerm:
-	cmpq $0, (%rdi)
-	jae .LendOfLoop
-	/*compare je .LendOfLoop /*if pointer to string char == 0, jump to end of loop*/
-
-.LincrementLenIfValidChar:
-	cmpb $1,  (%rdi)   /* if cur char < 97, not lower case */
-	jge .LcontinueLoop /* Jump if not lowercase(Uppercase Ascii < lowercase) */
-	cmpb $127, (%rdi)   /* if cur char > 122, not lower case */
-	jle .LcontinueLoop /* ignore upper symbols */
+	subq $8, %rsp 						//align stack pointer - restore address to multiple of 16
+	movl $0, %eax 						//zero out eax - could also XOR with itself?
 	
-.LcontinueLoop:
-	incl %eax //else, if not null term -> inc eax
-	incq %rdi //increment pointer to point at next char
-	jmp .LcheckNullTerm
+.LfindStrLen_checkNullTerm: 			//check for null term.
+	cmpb $0, (%rdi) 					//cmp \0 with (%rdi)
+	je .LfindStrLen_doneWithLoop 		// if \0 == (%rdi), jump to .LfindStrLen_doneWithLoop 
 
-.LendOfLoop:
-	addq $8, %rsp
+.LfindStrLen_incrementLengthAndPointer:
+	incq %rdi 							//increment rdi to point to next char 
+	incl %eax 							//increment eax which stores str len
+	jmp .LfindStrLen_checkNullTerm 		//check for null terminator after each loop 
+
+.LfindStrLen_doneWithLoop:
+	addq $8, %rsp 						//align stack ptr
 	ret
+/*--------END: find_string_length------------------------------------------------*/
+
 
 .globl strings_equal
 	
 	/*s1 stores in %rdi, s2 stored in %rsi*/
 
+/*--------BEGIN: strings_equal-------------------------------------------------*/
 strings_equal:
-	subq $8, %rsp /*align stack pointer */
+	//push callee saved registers r12, rbp, rbx
+	//need to pop in reverse order before returning to maintain stack alignment
+	pushq	%r12 				//(8 bytes offset)
+	pushq	%rbp 				//(8 bytes offset)
+	pushq	%rbx 				//(8 bytes offset)
 
-.LcompareStrLength:
-	call find_string_length     /*automatically uses arg1, s1*/
-	/* TODO: double check movzwq */
-	movzwq %ax, %r10          /*moving length of string 1 (which will always be <= 512/16 bites) to callee saved r10*/
-	push %rdi                  /*push s1 to the top of the stack */
-	movq (%rsi), %rdi          /* store s2 in %rdi so it will be arg1 */
-	call find_string_length    /*find length of string 2 which is now stored in arg1 */
-	movzwq %ax, %r11          /*move result, length of string 2 (which will always be =< 512 / 16 bites) to calle saved r11 */
-	pop %rdi                   /*move string 1 back to %rdi*/
-	cmpq %r10, %r11 		   /*compare q bc we've movzwq both string lengths */
-	jne .LstringsEqualresultStringsNotEqual /*jump to not equal condition*/
-	leaq (%rdi, %r10, 1), %r12 /*save  register value of thing after the last char in caller saved %r12*/
-
-.LstringsEqualCompareStrContentsEqual:
-//check to make sure we haven't reached end of string 1
-	movq (%rdi), %r10
-	cmpq (%r12), %r10
-	je .LstringsEqualresultStringsAreEqual 	//if so, jump to end and return true
-	cmpq %rsi, %rdi //else: compare equality of current character
-	jne .LstringsEqualresultStringsNotEqual	//if not equal jump return false
-	inc %rsi	//increment & 
-	inc %rdi	//increment & 
-	jmp .LstringsEqualCompareStrContentsEqual
-	//jump top of of the current label
-
-.LstringsEqualresultStringsAreEqual:
-	movl $1, %eax /*set default return value to 1, true*/
+	movq	%rdi, %rbp 			//rbp will maintain value of s1
+	movq	%rsi, %r12 			//r12 will maintain value of s2
+	call	find_string_length 	//find_str_len(%rdi = string 1)
+	movl	%eax, %ebx 			//store result = str_len(s1) to ebx
+	movq	%r12, %rdi			//move stored s2(in r12) to rdi to call fn
+	call	find_string_length	//find_str_len(%rdi = string 2)
+	cmpl	%eax, %ebx			//compare string lengths (eax=s2_len, ebx=s1_len)
+	je	.LstrEq_lengthsAreEqual //jump if equal - will zero out eax + enter main loop
+	movl	$0, %eax			//else: move 0 into eax (to return strings_equal = false)
+.LstrEq_restoreStackAndReturn:
+	popq	%rbx				//pop callee saved registers in reverse order that we pushed them
+	popq	%rbp				//	"
+	popq	%r12				//	"
 	ret
-.LstringsEqualresultStringsNotEqual:
-	movl $0, %eax /*set return value to false*/ 
-	ret 
 
+.LstrEq_lengthsAreEqual:
+	movl	$0, %eax			//zero out eax before entering main loop as it's being used as a counter
+
+.LstrEq_checkCharEq: 				//Main loop: checks each char to see if eq.
+	cmpl	%ebx, %eax				// compare ebx to eax
+	je	.LstrEq_isTrue				//if(eax = ebx: know str eq is true)
+	//TODO: I know the textbook says movslq isn't a thing, but the gcc assembler is ok with it?
+	movslq	%eax, %rdx				//move 4 byte val in eax to rdx so you can address the current char. in each string
+	movzbl	0(%r12, %rdx, 1), %ecx	//zero out upper 56 bits & move char in str2[r12] & index[rdx] to low 8 bits of rcx[cl]
+	cmpb	%cl, 0(%rbp, %rdx, 1)	//compare char from str2 [cl] with char from str1 [0(%rbp, %rdx, 1) = 0 + str1_mem_loc[rbp] + (index[rdx] * offset[1])]	
+	jne	.LstrEq_isFalse				//if chars aren't equal - strings can't be equal! Jump to return false.
+	incl %eax						//else: increment eax
+	jmp	.LstrEq_checkCharEq			//go back to top!
+
+.LstrEq_isTrue:
+	movl	$1, %eax				//set return value = 1
+	jmp	.LstrEq_restoreStackAndReturn
+
+.LstrEq_isFalse:
+	movl	$0, %eax				//set return value = 0
+	jmp	.LstrEq_restoreStackAndReturn
+
+/*--------END: strings_equal-------------------------------------------------*/
