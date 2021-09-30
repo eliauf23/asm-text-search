@@ -19,10 +19,6 @@
 
 
 
-
-
-
-
 find_string_length:
 
 	subq $8, %rsp /* align stack pointer - restore address to multiple of 16 */
@@ -87,5 +83,6 @@ strings_equal:
 .LstringsEqualresultStringsNotEqual:
 	movl $0, %eax /*set return value to false*/ 
 	ret 
+
 
 
