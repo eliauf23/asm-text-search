@@ -113,19 +113,18 @@ strings_equal:
 	movq	%r12, %rdi			//move stored *str(in r12) to rdi to call fn
 	call	find_string_length	//find_str_len(%rdi = *str)
 
-	cmpb 	$512, %eax 			//see if find_str_len(*str) > 512
+	cmpl 	$512, %eax 			//see if find_str_len(*str) > 512
 	jge 	.LcountOccur_substringOverMaxline	//If it is, greater, then you need to set %ebx to 512
 	jmp 	.LcountOccur_lastIndex 			  	//If it is less than 512, it remains (%eax)
 
 
 .LcountOccur_substringOverMaxline:
-	movb $512, %rax
-	jmp .LcountOccur_lastIndex
+	movl $512, %rax
 
 .LcountOccur_setLastIndex
-	subb 	%eax, %ebx			//subtract str_len(*line) - str_len(*str), save in %ebx
+	subl 	%eax, %ebx			//subtract str_len(*line) - str_len(*str), save in %ebx
 	movl	(%ebx), %r13d		//store the difference in calle-saved %r13
-	cmpb 	$0, (%r12)			//if *line len < *str len, return 0
+	cmpl 	$0, (%r12)			//if *line len < *str len, return 0
 	jl	 	.LcountOccur_errorExit
 
 
@@ -139,6 +138,11 @@ strings_equal:
 	popq	%r12				//	"
 	popq	%r13				//  "
 	ret
+
+/*--------END: count_occurrences----------------------------------------------------*/
+
+
+
 /*--------BEGIN: read_line---------------------------------------------------*/
 
 read_line:
@@ -199,7 +203,6 @@ read_line:
 /*--------BEGIN: count_occurrences--------------------------------------------------*/
 count_occurrences
 
-/*--------END: count_occurrences----------------------------------------------------*/
 
 
 
