@@ -1,4 +1,4 @@
-#define MAXLINE 511
+; #define MAXLINE 511
 
 /*
  * Assembly language implementations of functions declared in
@@ -7,7 +7,9 @@
 
 	.section .text 
 
+.globl strings_equal
 .globl find_string_length
+.globl read_line
 
 /*--------BEGIN: find_string_length------------------------------------------------*/
 find_string_length:
@@ -29,7 +31,6 @@ find_string_length:
 /*--------END: find_string_length------------------------------------------------*/
 
 
-.globl strings_equal
 	
 	/*s1 stores in %rdi, s2 stored in %rsi*/
 
@@ -79,3 +80,83 @@ strings_equal:
 	jmp	.LstrEq_restoreStackAndReturn
 
 /*--------END: strings_equal-------------------------------------------------*/
+
+
+/*--------BEGIN: read_line---------------------------------------------------*/
+
+read_line:
+	pushq %r12 //using to store file handle
+    pushq %rbp //using for buffer argument storage
+    pushq %rbx // using for index in buffer - 3*8 offset
+
+    movq %rdi, %r12//move file handle into r12
+	movq %rsi, %rbp //move buf(2nd argument) into rbp
+	call fgetc //get first character from file - will return char in %al (char -> 1 byte)
+	movl $0, %ebx //initialize index to be zero
+
+
+.LreadLine_checkIfValidChar:
+
+	cmpb	$-1, %al //check if fgetc gets negative result: i.e EOF
+	setne	%cl //sets ZF be ~ZF
+	cmpb	$10, %al //check if char is newline -> if so return val is 1
+	setne	%dl //sets ZF be ~ZF
+	testb	%dl, %cl //if equal, return 1, else continue in loop
+	je	.LreadLine_setReturnValue 
+
+	//beginning of "while loop"
+	movslq	%ebx, %rdx //sign extend ebx-> rdx
+	movb	%al, 0(%rbp,%rdx, 1)
+	cmpl	$511, %ebx //if ebx >=511, break out of loop
+	jge	.LreadLine_setReturnValue
+	movq	%r12, %rdi //move file ptr back into rdi
+	call	fgetc
+	incl	%ebx
+	jmp	.LreadLine_checkIfValidChar
+
+	je .LreadLine_setReturnValue
+
+.LreadLine_setReturnValueTo0:
+	movl $0, %eax
+	jmp .LreadLine_alignStackAndReturn
+
+.LreadLine_setReturnValue:
+	//null terminate before returning buffer
+	movslq %ebx, %rbx //extend index to be 8 byte num
+	movb $0, 0(%rbp, %rbx, 1) 	//null terminate buffer
+	cmpb $-1, %al //check if last char was EOF
+	je .LreadLine_setReturnValueTo0
+	
+	movl $1, %eax
+
+.LreadLine_alignStackAndReturn:
+	popq %rbx
+	popq %rbp
+	popq %r12
+	ret
+
+/*--------END: read_line---------------------------------------------------*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
