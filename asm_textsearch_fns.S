@@ -101,6 +101,7 @@ strings_equal:
 	pushq	%r12 				//(8 bytes offset)
 	pushq	%rbp 				//(8 bytes offset)
 	pushq	%rbx 				//(8 bytes offset)
+	subq $8, %rsp 				//-8 from stack pointer so that stack align. is an odd mult. of 8
 
 	movq	%rdi, %rbp 			//rbp will maintain value of *line
 	movq	%rsi, %r12 			//r12 will maintain value of *str

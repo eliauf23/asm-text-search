@@ -447,30 +447,3 @@ void test_count_occurrences(TestObjs *objs)
     //testing word that overflows over the char limit
     ASSERT(count_occurrences(objs->maxline_over, "star") == 0);
 }
-
-
-
-void test_starts_with()
-{
-
-    //simple true check
-    ASSERT(starts_with("wordalala", "wor") == 1);
-
-    //simple false check
-    ASSERT(starts_with("wordalala", "not") == 0);
-
-    //prefix is longer than string
-    ASSERT(starts_with("wor", "wordalala") == 0);
-
-    //words are equal
-    ASSERT(starts_with("word", "word") == 1);
-
-    //empty prefix
-    ASSERT(starts_with("summer nights", "") == 1);
-
-    //empty word
-    ASSERT(starts_with("", "summer") == 0);
-
-    //check with two words
-    ASSERT(starts_with("summer nights", "summer") == 1);
-}
