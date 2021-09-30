@@ -22,10 +22,11 @@ void cleanup(TestObjs *objs);
 
 void test_find_string_length(TestObjs *objs);
 void test_strings_equal();
-
-/* void test_read_line(TestObjs *objs);
-void test_print_line(TestObjs *objs);
+void test_read_line(TestObjs *objs);
 void test_count_occurrences(TestObjs *objs);
+
+/* 
+void test_print_line(TestObjs *objs);
 void test_starts_with();
 void test_find_all_occurrences(TestObjs *objs); */
 
@@ -42,12 +43,13 @@ int main(int argc, char **argv)
 
     TEST(test_find_string_length);
     TEST(test_strings_equal);
-
-
-
-   /*  TEST(test_read_line);
-    TEST(test_print_line);
+    TEST(test_read_line);
     TEST(test_count_occurrences);
+
+
+
+   /*  
+    TEST(test_print_line);
     TEST(test_starts_with);
     TEST(test_find_all_occurrences); */
 
@@ -374,4 +376,101 @@ void test_strings_equal()
 
     //newline char
     ASSERT(strings_equal("yXxwXcxXgkHS7Apt7\n", "yXxwXcxXgkHS7Apt7") == 0);
+}
+
+void test_read_line(TestObjs *objs)
+{
+    // the fmemopen function allows us to treat a character string
+    // as an input file
+    FILE *in = fmemopen((char *)objs->pandp, strlen(objs->pandp), "r");
+    char buf[MAXLINE + 1];
+
+    ASSERT(read_line(in, buf));
+
+    printf("Buffer contents%s\n", buf );
+    ASSERT(0 == strcmp(buf, "It is a truth universally acknowledged, that a single man in"));
+
+    ASSERT(read_line(in, buf));
+    ASSERT(0 == strcmp(buf, "possession of a good fortune, must be in want of a wife."));
+
+    ASSERT(read_line(in, buf));
+    ASSERT(0 == strcmp(buf, ""));
+
+    ASSERT(read_line(in, buf));
+    ASSERT(0 == strcmp(buf, "However little known the feelings or views of such a man may be"));
+
+    ASSERT(read_line(in, buf));
+    ASSERT(0 == strcmp(buf, "on his first entering a neighbourhood, this truth is so well"));
+
+    ASSERT(read_line(in, buf));
+    ASSERT(0 == strcmp(buf, "fixed in the minds of the surrounding families, that he is"));
+
+    ASSERT(read_line(in, buf));
+    ASSERT(0 == strcmp(buf, "considered as the rightful property of some one or other of their"));
+
+    ASSERT(read_line(in, buf));
+    ASSERT(0 == strcmp(buf, "daughters."));
+
+    // at this point we have read the last line
+    ASSERT(!read_line(in, buf));
+
+    fclose(in);
+
+    //TODO: add more files;
+}
+
+void test_count_occurrences(TestObjs *objs)
+{
+
+    //simple case
+    ASSERT(count_occurrences("It is a truth universally acknowledged, that a single man in", "truth") == 1);
+
+    //checking case sensitivity 1
+    ASSERT(count_occurrences("possession of a good fortune, must be in want of a wife.", "Good") == 0);
+
+    // just newline char
+    ASSERT(count_occurrences("\n", "NA") == 0);
+
+    //ignores punctuation
+    //line reads in text "neighbourhood, this"
+    ASSERT(count_occurrences("on his first entering a neighbourhood, this truth is so well", "neighbourhood, this") == 1);
+
+    //testing multiple occurances of substrings
+    ASSERT(count_occurrences("fixed in the minds of the surrounding families, that he is", "in") == 3);
+
+    //spacing test
+    ASSERT(count_occurrences("considered as the rightful property of some one or other of their", "s o m e") == 0);
+
+    //testing letters after char limit
+    ASSERT(count_occurrences(objs->maxline_513, "b") == 0);
+
+    //testing word that overflows over the char limit
+    ASSERT(count_occurrences(objs->maxline_over, "star") == 0);
+}
+
+
+
+void test_starts_with()
+{
+
+    //simple true check
+    ASSERT(starts_with("wordalala", "wor") == 1);
+
+    //simple false check
+    ASSERT(starts_with("wordalala", "not") == 0);
+
+    //prefix is longer than string
+    ASSERT(starts_with("wor", "wordalala") == 0);
+
+    //words are equal
+    ASSERT(starts_with("word", "word") == 1);
+
+    //empty prefix
+    ASSERT(starts_with("summer nights", "") == 1);
+
+    //empty word
+    ASSERT(starts_with("", "summer") == 0);
+
+    //check with two words
+    ASSERT(starts_with("summer nights", "summer") == 1);
 }
