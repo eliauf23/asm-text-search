@@ -79,3 +79,56 @@ strings_equal:
 	jmp	.LstrEq_restoreStackAndReturn
 
 /*--------END: strings_equal-------------------------------------------------*/
+
+
+
+.globl count_occurances
+
+/* %rdi -> *line %rsi -> *str
+
+/*--------BEGIN: count_occurances-------------------------------------------------*/
+
+//push callee saved registers r12, rbp, rbx
+//need to pop in reverse order before returning to maintain stack alignment
+	pushq	%r13				//(8 bytes offset)
+	pushq	%r12 				//(8 bytes offset)
+	pushq	%rbp 				//(8 bytes offset)
+	pushq	%rbx 				//(8 bytes offset)
+
+	movq	%rdi, %rbp 			//rbp will maintain value of *line
+	movq	%rsi, %r12 			//r12 will maintain value of *str
+
+	call	find_string_length 	//find_str_len(%rdi = *line)
+	movl	%eax, %ebx 			//store result = str_len(*line) to ebx
+	cmpl    $0, %ebx 			//if str_len(*line) == 0
+	jmpe	.LcountOccur_errorExit
+
+	movq	%r12, %rdi			//move stored *str(in r12) to rdi to call fn
+	call	find_string_length	//find_str_len(%rdi = *str)
+
+	cmpb 	$512, %eax 			//see if find_str_len(*str) > 512
+	jge 	.LcountOccur_substringOverMaxline	//If it is, greater, then you need to set %ebx to 512
+	jmp 	.LcountOccur_lastIndex 			  	//If it is less than 512, it remains (%eax)
+
+
+.LcountOccur_substringOverMaxline:
+	movb $512, %rax
+	jmp .LcountOccur_lastIndex
+
+.LcountOccur_setLastIndex
+	subb 	%eax, %ebx			//subtract str_len(*line) - str_len(*str), save in %ebx
+	movl	(%ebx), %r13d		//store the difference in calle-saved %r13
+	cmpb 	$0, (%r12)			//if *line len < *str len, return 0
+	jl	 	.LcountOccur_errorExit
+
+
+.LcountOccur_errorExit:
+	movl $0, %eax
+	call .LcountOccur_restoreStackAndReturn
+
+.LcountOccur_restoreStackAndReturn
+	popq	%rbx				//pop callee saved registers in reverse order that we pushed them
+	popq	%rbp				//	"
+	popq	%r12				//	"
+	popq	%r13				//  "
+	ret
