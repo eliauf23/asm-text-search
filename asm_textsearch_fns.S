@@ -6,10 +6,16 @@
  */
 
 	.section .text 
+	.section .bss
+
+	.align 8
+
+	countOccSubstr: .space(512 * 1)
 
 .globl strings_equal
 .globl find_string_length
 .globl read_line
+.global count_occurrences
 
 /*--------BEGIN: find_string_length------------------------------------------------*/
 find_string_length:
@@ -139,6 +145,10 @@ read_line:
 
 
 
+/*--------BEGIN: count_occurrences--------------------------------------------------*/
+count_occurrences
+
+/*--------END: count_occurrences----------------------------------------------------*/
 
 
 
