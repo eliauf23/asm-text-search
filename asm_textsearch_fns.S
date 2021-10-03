@@ -97,19 +97,18 @@ strings_equal:
 //push callee saved registers r12, rbp, rbx
 //need to pop in reverse order before returning to maintain stack alignment
 count_occurrences:
-	pushq	%r15
-	pushq	%r14
-	pushq	%r13
+	pushq	%r15 //moving search string into r15
+	pushq	%r14 //using it for string length of line & modif. when calc last_index
+	pushq	%r13 //intermediary return value
 
-	pushq	%r12
-	pushq	%rbp
-	pushq	%rbx
+	pushq	%r12 //moving line into r12
+	pushq	%rbp //pointer to array
+	pushq	%rbx //storing string length (termination condition for inner loop)
 
 	subq	$8, %rsp
 
 	movq	%rdi, %r12
 	movq	%rsi, %r15
-	movq $countOccSubstr, %rbp
 
 	movl $0, %eax //zero out eax
 	call	find_string_length //find str len of line
@@ -121,6 +120,10 @@ count_occurrences:
 	movl	%eax, %ebx //else move str_len into ebx
 	cmpl	$510, %eax //check if string length >= 511 (i.e. > 510)
 	jg	.LcountOcc_setRetValEq0				//if greater than, jump to return 0
+
+	movq $countOccSubstr, %rbp
+
+
 	cmpl	$512, %r14d //if line len <=512...go directly to check if last index < 0
 	jle	.LcountOcc_checkLastIndexNotLessThan0
 	movl	$512, %r14d //else set line len = 512
@@ -130,16 +133,15 @@ count_occurrences:
 	movl	%eax, %r14d //store in r14d
 	//if less than 0, return 0
 	js	.LcountOcc_setRetValEq0
-	movl	$0, %ebp //set int i = 0
+	movq	$0, %r10 //set int i = 0
 	movl	$0, %r13d //set line_total = 0 (return val)
 	jmp	.LcountOcc_checkConditionOfOuterLoop
 .LcountOcc_getSubstringFromLine:
 	
-	leaq	0(%rbp,%rax), %rdx //get substr[j] & move address into rdx
+	leaq	0(%r10,%rax), %rdx //get substr[j] & move address into rdx
 	movzbl	(%r12,%rdx), %ecx //move char @ line[i+j] into %ecx
 	movb	%cl, (%rbp,%rdx)
 	addq	$1, %rax //inc j
-
 
 .LcountOcc_outerLoop:
 	cmpl	%ebx, %eax //compare str_len to j
@@ -150,9 +152,9 @@ count_occurrences:
 	movq	%r15, %rsi //move orig ptr of string into 2nd argument before calling strings equal
 	call	strings_equal
 	addl	%eax, %r13d //add the return value (0 or 1) to line_total 
-	addl	$1, %ebp //increment i (outer loop)
+	addl	$1, %r10d //increment i (outer loop)
 .LcountOcc_checkConditionOfOuterLoop:
-	cmpl	%r14d, %ebp //compare i to last index. If i is greater than equal, return line total
+	cmpl	%r14d, %r10d //compare i to last index. If i is greater than equal, return line total
 	jge	.LcountOcc_alignStackAndReturn
 	movl	$0, %eax //else set j = 0 
 	jmp	.LcountOcc_outerLoop
