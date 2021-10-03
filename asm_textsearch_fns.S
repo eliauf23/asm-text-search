@@ -5,17 +5,18 @@
  * textsearch_fns.h
  */
 
-	.section .text 
 	.section .bss
+	.align 16
 
-	.align 8
+countOccSubstr: .space (512 * 1)
 
-	countOccSubstr: .space(512 * 1)
+.section .text 
 
-.globl strings_equal
-.globl find_string_length
-.globl read_line
-.global count_occurrences
+	.globl find_string_length
+
+	.globl strings_equal
+	.globl read_line
+	.global count_occurrences
 
 /*--------BEGIN: find_string_length------------------------------------------------*/
 find_string_length:
@@ -69,7 +70,6 @@ strings_equal:
 .LstrEq_checkCharEq: 				//Main loop: checks each char to see if eq.
 	cmpl	%ebx, %eax				// compare ebx to eax
 	je	.LstrEq_isTrue				//if(eax = ebx: know str eq is true)
-	//TODO: I know the textbook says movslq isn't a thing, but the gcc assembler is ok with it?
 	movslq	%eax, %rdx				//move 4 byte val in eax to rdx so you can address the current char. in each string
 	movzbl	0(%r12, %rdx, 1), %ecx	//zero out upper 56 bits & move char in str2[r12] & index[rdx] to low 8 bits of rcx[cl]
 	cmpb	%cl, 0(%rbp, %rdx, 1)	//compare char from str2 [cl] with char from str1 [0(%rbp, %rdx, 1) = 0 + str1_mem_loc[rbp] + (index[rdx] * offset[1])]	
@@ -89,7 +89,6 @@ strings_equal:
 
 
 
-.globl count_occurances
 
 /* %rdi -> *line %rsi -> *str
 
@@ -97,47 +96,77 @@ strings_equal:
 
 //push callee saved registers r12, rbp, rbx
 //need to pop in reverse order before returning to maintain stack alignment
-	pushq	%r13				//(8 bytes offset)
-	pushq	%r12 				//(8 bytes offset)
-	pushq	%rbp 				//(8 bytes offset)
-	pushq	%rbx 				//(8 bytes offset)
-	subq $8, %rsp 				//-8 from stack pointer so that stack align. is an odd mult. of 8
+count_occurrences:
+	pushq	%r15
+	pushq	%r14
+	pushq	%r13
 
-	movq	%rdi, %rbp 			//rbp will maintain value of *line
-	movq	%rsi, %r12 			//r12 will maintain value of *str
+	pushq	%r12
+	pushq	%rbp
+	pushq	%rbx
 
-	call	find_string_length 	//find_str_len(%rdi = *line)
-	movl	%eax, %ebx 			//store result = str_len(*line) to ebx
-	cmpl    $0, %ebx 			//if str_len(*line) == 0
-	jmpe	.LcountOccur_errorExit
+	subq	$8, %rsp
 
-	movq	%r12, %rdi			//move stored *str(in r12) to rdi to call fn
-	call	find_string_length	//find_str_len(%rdi = *str)
+	movq	%rdi, %r12
+	movq	%rsi, %r15
+	movq $countOccSubstr, %rbp
 
-	cmpl 	$512, %eax 			//see if find_str_len(*str) > 512
-	jge 	.LcountOccur_substringOverMaxline	//If it is, greater, then you need to set %ebx to 512
-	jmp 	.LcountOccur_lastIndex 			  	//If it is less than 512, it remains (%eax)
+	movl $0, %eax //zero out eax
+	call	find_string_length //find str len of line
+	movl	%eax, %r14d //move result into r14d
+	movq	%r15, %rdi //move 2nd arg into rdi
+	call	find_string_length //find string length of search string
+	testl	%eax, %eax //check if str_len == 0
+	je	.LcountOcc_setRetValEq0 			//if str len = 0, nothing matches - align stack & ret
+	movl	%eax, %ebx //else move str_len into ebx
+	cmpl	$510, %eax //check if string length >= 511 (i.e. > 510)
+	jg	.LcountOcc_setRetValEq0				//if greater than, jump to return 0
+	cmpl	$512, %r14d //if line len <=512...go directly to check if last index < 0
+	jle	.LcountOcc_checkLastIndexNotLessThan0
+	movl	$512, %r14d //else set line len = 512
+
+.LcountOcc_checkLastIndexNotLessThan0:
+	subl	%ebx, %eax //calc last index = line len - str len
+	movl	%eax, %r14d //store in r14d
+	//if less than 0, return 0
+	js	.LcountOcc_setRetValEq0
+	movl	$0, %ebp //set int i = 0
+	movl	$0, %r13d //set line_total = 0 (return val)
+	jmp	.LcountOcc_checkConditionOfOuterLoop
+.LcountOcc_getSubstringFromLine:
+	
+	leaq	0(%rbp,%rax), %rdx //get substr[j] & move address into rdx
+	movzbl	(%r12,%rdx), %ecx //move char @ line[i+j] into %ecx
+	movb	%cl, (%rbp,%rdx)
+	addq	$1, %rax //inc j
 
 
-.LcountOccur_substringOverMaxline:
-	movl $512, %rax
-
-.LcountOccur_setLastIndex
-	subl 	%eax, %ebx			//subtract str_len(*line) - str_len(*str), save in %ebx
-	movl	(%ebx), %r13d		//store the difference in calle-saved %r13
-	cmpl 	$0, (%r12)			//if *line len < *str len, return 0
-	jl	 	.LcountOccur_errorExit
-
-
-.LcountOccur_errorExit:
-	movl $0, %eax
-	call .LcountOccur_restoreStackAndReturn
-
-.LcountOccur_restoreStackAndReturn
-	popq	%rbx				//pop callee saved registers in reverse order that we pushed them
-	popq	%rbp				//	"
-	popq	%r12				//	"
-	popq	%r13				//  "
+.LcountOcc_outerLoop:
+	cmpl	%ebx, %eax //compare str_len to j
+	jl	.LcountOcc_getSubstringFromLine 			//if j < str_len jmp to LcountOcc_getSubstringFromLine
+	movslq	%ebx, %rax //move str_len to rax
+	movb	$0, (%rbp,%rax) //null terminate substr[str_len]
+	movq	%rbp, %rdi //move substr(alloc on stack) address into 1st arg register before making function call
+	movq	%r15, %rsi //move orig ptr of string into 2nd argument before calling strings equal
+	call	strings_equal
+	addl	%eax, %r13d //add the return value (0 or 1) to line_total 
+	addl	$1, %ebp //increment i (outer loop)
+.LcountOcc_checkConditionOfOuterLoop:
+	cmpl	%r14d, %ebp //compare i to last index. If i is greater than equal, return line total
+	jge	.LcountOcc_alignStackAndReturn
+	movl	$0, %eax //else set j = 0 
+	jmp	.LcountOcc_outerLoop
+.LcountOcc_setRetValEq0:
+	movl	$0, %r13d
+.LcountOcc_alignStackAndReturn:
+	movl	%r13d, %eax
+	popq	%rbx
+	popq	%rbp
+	popq	%r12
+	popq	%r13
+	popq	%r14
+	popq	%r15
+	addq $8, %rsp
 	ret
 
 /*--------END: count_occurrences----------------------------------------------------*/
@@ -198,12 +227,6 @@ read_line:
 	ret
 
 /*--------END: read_line---------------------------------------------------*/
-
-
-
-/*--------BEGIN: count_occurrences--------------------------------------------------*/
-count_occurrences
-
 
 
 

@@ -45,4 +45,4 @@ tctest.o : tctest.c tctest.h
 textsearch_fns_tests.o : textsearch_fns_tests.c textsearch_fns.h tctest.h
 
 clean :
-	rm -f c_textsearch c_textsearch_fns_tests *.o
+	rm -f c_textsearch asm_textsearch c_textsearch_fns_tests asm_textsearch_fns_tests *.o
