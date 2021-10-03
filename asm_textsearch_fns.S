@@ -137,30 +137,40 @@ count_occurrences:
 	js	.LcountOcc_setRetValEq0
 	movq	$0, %r10 //set int i = 0
 	movl	$0, %r13d //set line_total = 0 (return val)
+	movq $countOccSubstr, %rbp
+
 	jmp	.LcountOcc_checkConditionOfOuterLoop
 
 .LcountOcc_fixLastIndexIfNec:
 	movl	$512, %r14d //else set line len = 512
 
 .LcountOcc_getSubstringFromLine:
-	
-	leaq	0(%r10,%rax), %rdx //get substr[j] & move address into rdx
+	//figure out the base address of substring array (%rbp)
+	//enter j loop
+	//get substring[j] anything from 0, 4 (len = 5)
+	//
+	leaq	0(%rbp,%rax), %rdx //get substr[j] & move address into rdx
 	movzbl	(%r12,%rdx), %ecx //move char @ line[i+j] into %ecx
 	movb	%cl, (%rbp,%rdx)
-	addq	$1, %rax //inc j
+	addl	$1, %eax //inc j
 
 .LcountOcc_outerLoop:
-	cmpl	%ebx, %eax //compare str_len to j
+	cmpl %r10d, %r14d
+	//cmpl	%ebx, %eax //compare str_len to j
 	jl	.LcountOcc_getSubstringFromLine 			//if j < str_len jmp to LcountOcc_getSubstringFromLine
 	movslq	%ebx, %rax //move str_len to rax
 	movb	$0, (%rbp,%rax) //null terminate substr[str_len]
+	
 	movq	%rbp, %rdi //move substr(alloc on stack) address into 1st arg register before making function call
 	movq	%r15, %rsi //move orig ptr of string into 2nd argument before calling strings equal
 	call	strings_equal
 	addl	%eax, %r13d //add the return value (0 or 1) to line_total 
 	addl	$1, %r10d //increment i (outer loop)
+	addq $1, %rbp
+	addq $1, %r15
+
 .LcountOcc_checkConditionOfOuterLoop:
-	movq $countOccSubstr, %rbp
+
 	cmpl	%r14d, %r10d //compare i to last index. If i is greater than equal, return line total
 	jge	.LcountOcc_alignStackAndReturn
 	movl	$0, %eax //else set j = 0 
