@@ -45,7 +45,6 @@ find_string_length:
 strings_equal:
 	//push callee saved registers r12, rbp, rbx
 	//need to pop in reverse order before returning to maintain stack alignment
-	pushq	%r12 				//(8 bytes offset)
 	pushq	%rbp 				//(8 bytes offset)
 	pushq	%rbx 				//(8 bytes offset)
 
@@ -94,7 +93,7 @@ strings_equal:
 
 /*--------BEGIN: count_occurances-------------------------------------------------*/
 
-//push callee saved registers r12, rbp, rbx
+//push callee saved registers r15, r14, 413, r12, rbp, rbx
 //need to pop in reverse order before returning to maintain stack alignment
 count_occurrences:
 	pushq	%r15
@@ -137,7 +136,7 @@ count_occurrences:
 	
 	leaq	0(%rbp,%rax), %rdx //get substr[j] & move address into rdx
 	movzbl	(%r12,%rdx), %ecx //move char @ line[i+j] into %ecx
-	movb	%cl, (%rbp,%rdx)
+	movb	%cl, (%rbp,%rdx) 
 	addq	$1, %rax //inc j
 
 
