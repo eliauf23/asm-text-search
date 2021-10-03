@@ -113,22 +113,24 @@ count_occurrences:
 	movl $0, %eax //zero out eax
 	call	find_string_length //find str len of line
 	movl	%eax, %r14d //move result into r14d
+
+
+
 	movq	%r15, %rdi //move 2nd arg into rdi
 	call	find_string_length //find string length of search string
+
+	//check if string length == 0
 	testl	%eax, %eax //check if str_len == 0
 	je	.LcountOcc_setRetValEq0 			//if str len = 0, nothing matches - align stack & ret
-	movl	%eax, %ebx //else move str_len into ebx
 	cmpl	$510, %eax //check if string length >= 511 (i.e. > 510)
 	jg	.LcountOcc_setRetValEq0				//if greater than, jump to return 0
+	movl	%eax, %ebx //else move str_len into ebx
 
-	movq $countOccSubstr, %rbp
 
-
+//check if line length > 512
 	cmpl	$512, %r14d //if line len <=512...go directly to check if last index < 0
-	jle	.LcountOcc_checkLastIndexNotLessThan0
-	movl	$512, %r14d //else set line len = 512
-
-.LcountOcc_checkLastIndexNotLessThan0:
+	jg	.LcountOcc_fixLastIndexIfNec
+	
 	subl	%ebx, %eax //calc last index = line len - str len
 	movl	%eax, %r14d //store in r14d
 	//if less than 0, return 0
@@ -136,6 +138,10 @@ count_occurrences:
 	movq	$0, %r10 //set int i = 0
 	movl	$0, %r13d //set line_total = 0 (return val)
 	jmp	.LcountOcc_checkConditionOfOuterLoop
+
+.LcountOcc_fixLastIndexIfNec:
+	movl	$512, %r14d //else set line len = 512
+
 .LcountOcc_getSubstringFromLine:
 	
 	leaq	0(%r10,%rax), %rdx //get substr[j] & move address into rdx
@@ -154,6 +160,7 @@ count_occurrences:
 	addl	%eax, %r13d //add the return value (0 or 1) to line_total 
 	addl	$1, %r10d //increment i (outer loop)
 .LcountOcc_checkConditionOfOuterLoop:
+	movq $countOccSubstr, %rbp
 	cmpl	%r14d, %r10d //compare i to last index. If i is greater than equal, return line total
 	jge	.LcountOcc_alignStackAndReturn
 	movl	$0, %eax //else set j = 0 
