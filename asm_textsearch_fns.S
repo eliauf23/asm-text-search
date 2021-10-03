@@ -45,7 +45,6 @@ find_string_length:
 strings_equal:
 	//push callee saved registers r12, rbp, rbx
 	//need to pop in reverse order before returning to maintain stack alignment
-	pushq	%r12 				//(8 bytes offset)
 	pushq	%rbp 				//(8 bytes offset)
 	pushq	%rbx 				//(8 bytes offset)
 
@@ -94,7 +93,7 @@ strings_equal:
 
 /*--------BEGIN: count_occurances-------------------------------------------------*/
 
-//push callee saved registers r12, rbp, rbx
+//push callee saved registers r15, r14, 413, r12, rbp, rbx
 //need to pop in reverse order before returning to maintain stack alignment
 count_occurrences:
 	pushq	%r15 //moving search string into r15
