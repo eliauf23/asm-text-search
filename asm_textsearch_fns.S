@@ -111,7 +111,7 @@ count_occurrences:
 
 	movl $0, %eax //zero out eax
 	call	find_string_length //find str len of line
-	movl	%eax, %r14d //move result into r14d
+	movl	%eax, %r14d //move result, str_len of line into r14d
 	movq	%r15, %rdi //move 2nd arg into rdi
 	call	find_string_length //find string length of search string
 	testl	%eax, %eax //check if str_len == 0
