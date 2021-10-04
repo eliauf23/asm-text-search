@@ -114,7 +114,6 @@ count_occurrences:
 	movl	%eax, %r14d //move result into r14d
 
 
-
 	movq	%r15, %rdi //move 2nd arg into rdi
 	call	find_string_length //find string length of search string
 
