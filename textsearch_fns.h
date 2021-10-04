@@ -1,5 +1,6 @@
 #ifndef TEXTSEARCH_FNS_H
 #define TEXTSEARCH_FNS_H
+#include <stdio.h>
 
 #define MAXLINE 511
 
