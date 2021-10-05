@@ -39,7 +39,7 @@ find_string_length:
 	incl %eax 							//increment eax which stores str len
 	jmp .LfindStrLen_checkNullTerm 		//check for null terminator after each loop 
 .LfindStrLen_checkNullTerm: 			//check for null term.
-	movl	%eax, %edx
+	movslq	%eax, %rdx
 	cmpb	$0, (%rdi,%rdx)
 	jne .LfindStrLen_incrementLengthAndPointer 		// if \0 == (%rdi), jump to .LfindStrLen_doneWithLoop 
 
@@ -305,7 +305,6 @@ find_all_occurrences:
 	movq	%rdi, %r14  //store file handle
 	movq	%rsi, %r13//store search str
 	movl	%edx, %r12d//store bool: printOccurrences
-	movq	%fs:40, %rax
 	movq	%rax, 520(%rsp)
 	xorl	%eax, %eax
 	movl	$0, %ebx
