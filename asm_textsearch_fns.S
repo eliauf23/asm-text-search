@@ -1,4 +1,4 @@
-#define MAXLINE 511
+;#define MAXLINE 511
 
 /*
  * Assembly language implementations of functions declared in
@@ -6,7 +6,9 @@
  */
 
  .section .rodata
-	.printStr_formatStr:	.string	"%s\n"
+
+	.printStr_formatStr:	
+		.string	"%s\n"
 
 .section .text 
 
@@ -31,15 +33,15 @@
 find_string_length:
 	subq $8, %rsp 						//align stack pointer - restore address to multiple of 16
 	movl $0, %eax 						//zero out eax - could also XOR with itself?
-	
-.LfindStrLen_checkNullTerm: 			//check for null term.
-	cmpb $0, (%rdi) 					//cmp \0 with (%rdi)
-	je .LfindStrLen_doneWithLoop 		// if \0 == (%rdi), jump to .LfindStrLen_doneWithLoop 
+	jmp .LfindStrLen_checkNullTerm
 
 .LfindStrLen_incrementLengthAndPointer:
-	incq %rdi 							//increment rdi to point to next char 
 	incl %eax 							//increment eax which stores str len
 	jmp .LfindStrLen_checkNullTerm 		//check for null terminator after each loop 
+.LfindStrLen_checkNullTerm: 			//check for null term.
+	movslq	%eax, %rdx
+	cmpb	$0, (%rdi,%rdx)
+	jne .LfindStrLen_incrementLengthAndPointer 		// if \0 == (%rdi), jump to .LfindStrLen_doneWithLoop 
 
 .LfindStrLen_doneWithLoop:
 	addq $8, %rsp 						//align stack ptr
@@ -303,7 +305,6 @@ find_all_occurrences:
 	movq	%rdi, %r14  //store file handle
 	movq	%rsi, %r13//store search str
 	movl	%edx, %r12d//store bool: printOccurrences
-	movq	%fs:40, %rax
 	movq	%rax, 520(%rsp)
 	xorl	%eax, %eax
 	movl	$0, %ebx
