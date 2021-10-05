@@ -4,7 +4,6 @@
  */
  
 .section .rodata
-	.align 8
 
 cFmtStr:
 	.string	"-c"
@@ -25,15 +24,16 @@ errorMsg:
 	.globl	main
 
 main:
-	pushq 	%r15 //pointer to argvs initially & then pointer to input file handle
+
+    pushq 	%r15 //pointer to argvs initially & then pointer to input file handle
 	pushq	%r14 //used for printOccurrences var
 	pushq	%r13 //address of search string
 	pushq	%r12 //stores filename idx
 	pushq 	%rbp
 	pushq	%rbx //stores argc (in lower 32 bits)
-	subq $8, %rsp
 
-	movl	%edi, %ebx //move argc to low 32 of rbx
+	
+    movl	%edi, %ebx //move argc to low 32 of rbx
 	movq	%rsi, %rbp //move pointer to argv to rbp
 	movslq	%edi, %rax //move num args to rax
 
@@ -52,10 +52,12 @@ main:
 	movq	(%rbp,%r12,8), %rdi //use filename idx to get pointer to filename from argvs
 	movq	$readStr, %rsi //get "r" string into 2nd arg
 	call	fopen //try to open file
-	movq	%rax, %r15 //move file handle to rbp
+
 	testq	%rax, %rax //if zero i.e. input is null
 	je	.Lmain_exitOnError_cantOpenFile
-	cmpl	$3, %ebx //if argc ==3 & user requests to display matches (not num matches)
+	
+	movq	%rax, %r15 //move file handle to rbp
+    cmpl	$3, %ebx //if argc ==3 & user requests to display matches (not num matches)
 	sete	%dl //if equals -> set this =1
 	testl	%r14d, %r14d //if print occurrences == 0
 	sete	%al //then set this = 1
@@ -69,19 +71,16 @@ main:
 	movq	%r13, %rsi //move search string into 2nd arg
 	movq	$0, %rdx //set print occ == 0 (3rd arg)
 	call	find_all_occurrences
-	movl	%eax, %edx //move number of occurrences ret by find all occ into 3rd arg of printf
-	movq	$numOcc, %rsi
-	movl	$1, %edi //number of args
+	movl	%eax, %esi //move number of occurrences ret by find all occ into 3rd arg of printf
+	movq	$numOcc, %rdi
 	movl	$0, %eax //zero out ret val
 	call	printf
 
 .Lmain_closeFilePtr:
-	movq	%rbp, %rdi
+	movq	%r15, %rdi
 	call	fclose
 
 .Lmain_setReturnValue0:
-	movq	%r15, %rdi
-	call	fclose
 	movl	$0, %eax
 	jmp .Lmain_alignStackAndRet
 
@@ -105,7 +104,10 @@ main:
 	jmp .Lmain_printErrorMsg
 
 .Lmain_exitOnError_other:
-	movq	$errorMsg, %rsi
+    
+	movq	%r15, %rdi
+	call    fclose
+    movq	$errorMsg, %rsi
 	jmp .Lmain_printErrorMsg
 
 .Lmain_printErrorMsg:
@@ -114,11 +116,11 @@ main:
 	movl	$1, %eax
 
 .Lmain_alignStackAndRet:
-	popq	%rbx
+	
+    popq	%rbx
 	popq	%rbp
 	popq	%r12
 	popq	%r13
 	popq	%r14
 	popq 	%r15
-	addq 	$8, %rsi
 	ret
