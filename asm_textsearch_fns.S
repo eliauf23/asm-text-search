@@ -138,10 +138,10 @@ count_occurrences:
 	testl	%eax, %eax 			//check if str_len == 0
 	je	.LcountOcc_setRetValEq0 //if str len = 0, nothing matches - align stack & ret
 	movl	%eax, %ebx
-	cmpl	$510, %eax 			//check if string length >= 511 (i.e. > 510)
-	jg	.LcountOcc_setRetValEq0	//if greater than, jump to return 0
+	cmpl	$512, %eax 			//check if string length > 511 (i.e. > 510)
+	jge	.LcountOcc_setRetValEq0	//if greater than, jump to return 0
 	cmpl	$512, %r14d
-	jle	.LcountOcc_findLastIndex
+	jl .LcountOcc_findLastIndex
 	movl	$512, %r14d
 .LcountOcc_findLastIndex:	
 	subl	%ebx, %r14d 		//calc last index = line len - str len
