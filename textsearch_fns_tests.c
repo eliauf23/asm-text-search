@@ -151,8 +151,8 @@ void test_print_line(TestObjs *objs)
 {
 
     //simple printing test
-    char buf_1[MAXLINE + 1];
-    FILE *out_1 = fmemopen(buf_1, 513, "w");
+    char * buf_1 = calloc(512, sizeof(char));
+    FILE *out_1 = fmemopen(buf_1, strlen(buf_1), "w");
 
     print_line(out_1, (char *)objs->test_str);
 
@@ -169,8 +169,10 @@ void test_print_line(TestObjs *objs)
     }
     fclose(out_1);
 
+    free(buf_1);
     //print line that is greater than the maxline limit
-    char buf_2[MAXLINE + 1];
+
+    char * buf_2 = calloc(512, sizeof(char));
     FILE *out_2 = fmemopen(buf_2, strlen(buf_2), "w");
     print_line(out_2, objs->maxline_513);
     char *expected_str = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
@@ -186,8 +188,8 @@ void test_print_line(TestObjs *objs)
     }
 
     fclose(out_2);
-
-    char buf_4[MAXLINE + 1];
+    free(buf_2);
+    char * buf_4 = calloc(512, sizeof(char));
 
     FILE *out_4 = fmemopen((char *)buf_4, strlen(buf_4), "w");
     print_line(out_4, objs->pandp);
@@ -205,7 +207,7 @@ void test_print_line(TestObjs *objs)
     }
 
     fclose(out_4);
-
+free(buf_4);
     //only ever use it for stoud and by defition will never be null
 }
 
