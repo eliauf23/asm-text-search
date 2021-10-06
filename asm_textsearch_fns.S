@@ -138,13 +138,14 @@ count_occurrences:
 	testl	%eax, %eax 			//check if str_len == 0
 	je	.LcountOcc_setRetValEq0 //if str len = 0, nothing matches - align stack & ret
 	movl	%eax, %ebx			// else store length to be used as counter
-	cmpl	$510, %eax 			//check if string length >= 511 (i.e. > 510)
+	cmpl	$511, %eax 			//check if string length > 511
 	jg	.LcountOcc_setRetValEq0	//if greater than, jump to return 0
-	cmpl	$512, %r14d			//check if line is >= 512
+	cmpl	$511, %r14d			//check if line is >= 512
 	jle	.LcountOcc_findLastIndex //if not, go to loop
-	movl	$512, %r14d			//if line is >512, then we should only search the first 512 chars so we move 512 to line_len variable
+	movl	$511, %r14d			//if line is >=512, then we should only search the first 511 chars so we move 512 to line_len variable
 .LcountOcc_findLastIndex:	
-	subl	%ebx, %r14d 		//calc last index = line len - str len
+	subl	%ebx, %r14d 		//calc last index = line len - str len + 1
+	incl 	%r14d
 	js	.LcountOcc_setRetValEq0
 	movl	$0, %ebp 			//int i = 0
 	movl	$0, %r13d 			//line_total = 0 (counter)
