@@ -1,126 +1,130 @@
 /*
+ * Elizabeth Aufzien, eaufzie1@jh.edu
+ * Rosie Wolkind, rwolkin1@jh.edu
+ * 
  * Assembly language implementation of the main function
  * for the asm_textsearch_fns program
- */
- 
-.section .rodata
+ */	
 
-cFmtStr:
-	.string	"-c"
+ .section .rodata
+
 insufficientArgs:
-	.string	"User did not supply sufficient arguments."
+	.string	"User did not supply sufficient arguments.\n"
 tooManyArgs:
-	.string	"User supplied too many arguments."
+	.string	"User supplied too many arguments.\n"
+cFlag:
+	.string	"-c"
 readStr:
 	.string	"r"
 cannotOpenFile:
-	.string	"File cannot be opened. "
+	.string	"File cannot be opened.\n"
 numOcc:
 	.string	"%d occurrence(s)\n"
 errorMsg:
-	.string	"Error!"
+	.string	"Error!\n"
 
 .section .text
 	.globl	main
 
+
 main:
 
-    pushq 	%r15 //pointer to argvs initially & then pointer to input file handle
-	pushq	%r14 //used for printOccurrences var
-	pushq	%r13 //address of search string
-	pushq	%r12 //stores filename idx
-	pushq 	%rbp
-	pushq	%rbx //stores argc (in lower 32 bits)
-
+	/* push callee saved registers & align stack */
+	pushq	%r13		//offset: 8
+	pushq	%r12		//offset: 16
+	pushq	%rbp		//offset: 24
+	pushq	%rbx		//offset: 32
+	subq	$8, %rsp 	//to properly align stack (offset = 40 - odd. mult of 8)
 	
-    movl	%edi, %ebx //move argc to low 32 of rbx
-	movq	%rsi, %rbp //move pointer to argv to rbp
-	movslq	%edi, %rax //move num args to rax
+	cmpl	$2, %edi 	//check if argc < 3
+	jle	.Lmain_errorInsufficientArgs
 
-	movq	-16(%rsi,%rax,8), %r13 //move address of search string into r13
-	leaq	-1(%rdi), %r12 //store index in argvs of filename(=argc-1)
+	movl	%edi, %ebx	//store argc in ebx so we can check if argc = 3 or 4 (to set value of print occurrences)
+	cmpl	$4, %edi	//check if argc <= 4 (& to get here must be >= 3)
+	jle	.Lmain_openFileAndCountOcc
+
+.Lmain_errorTooManyArgs:
+	movq	stderr(%rip), %rdi		//move output stream=stderr to 1st arg
+	leaq	tooManyArgs(%rip), %rsi		//move error message to 2nd arg
+	jmp .Lmain_printErrorMsgExit1	//jmp to label where msg is printed & exit(1)
+
+
+.Lmain_errorInsufficientArgs:
+	movq	stderr(%rip), %rdi		//move output stream=stderr to 1st arg
+	leaq	insufficientArgs(%rip), %rsi		//move error message to 2nd arg
+	jmp .Lmain_printErrorMsgExit1	//jmp to label where msg is printed & exit(1)
+
+
+.Lmain_openFileAndCountOcc:
+	movslq	%edi, %rax 				//move & sign extend argc to rax 
+	movq	-16(%rsi,%rax, 8), %r12 //move search string = argv[argc - 2] to r12
+	movq	-8(%rsi,%rax, 8), %rbp  //move filename = argv[argc - 1] to rbp
 	
-	movq	8(%rsi), %rdi //adress of rsi + 8 = argv[1] bc its an array of ptrs
-	movq	$cFmtStr, %rsi //load "-c" format string address into second arg
-	call	strings_equal //check if args contains c flag
-	cmpl	$3, %ebx //check if argc < 3
-	jl	.Lmain_exitOnError_insufficientArgs //if less than - error not enough args
-	movl	%eax, %r14d //else move ret val from strings_equal call to r14d
-	cmpl	$4, %ebx //check if argc > 4
-	jg	.Lmain_exitOnError_tooManyArgs //if greater than - error too many args
+	movq	8(%rsi), %rdi 			//move argv[1] to 1st arg
+	leaq	cFlag(%rip), %rsi 		//move "-c" string to second arg
+	call	strings_equal 			//check if strings equal
+	movl	%eax, %r13d 			//move result = has_c_flag to r13d
 
-	movq	(%rbp,%r12,8), %rdi //use filename idx to get pointer to filename from argvs
-	movq	$readStr, %rsi //get "r" string into 2nd arg
-	call	fopen //try to open file
+	movq	%rbp, %rdi 				//move pointer to filename to first arg
+	leaq	readStr(%rip), %rsi 		//load "r" string to second arg
+	call	fopen					//try to open file
 
-	testq	%rax, %rax //if zero i.e. input is null
-	je	.Lmain_exitOnError_cantOpenFile
+	movq	%rax, %rbp				//store file pointer in rbp (rax not eax bc its a mem. address)
+	testq	%rax, %rax				//check if rax is null (i.e. rax & rax bitwise = zero vector)
+	jz	.Lmain_errorCannotOpenFile	//if file ptr is NULL --> print err msg to stderr & exit(1)
 	
-	movq	%rax, %r15 //move file handle to rbp
-    cmpl	$3, %ebx //if argc ==3 & user requests to display matches (not num matches)
-	sete	%dl //if equals -> set this =1
-	testl	%r14d, %r14d //if print occurrences == 0
-	sete	%al //then set this = 1
-	testb	%al, %dl //if al = 1 & print occ == 0 -> disp. matches
-	jne	.Lmain_findAllOccurrences_displayMatches
-	//only other case is if argc !=3 -> al= 0 & print occ == 0
-	cmpl	$4, %ebx //if argc == 4
-	jne	.Lmain_exitOnError_other
-	//else: 
-	movq	%r15, %rdi //move file handle into 1st arg
-	movq	%r13, %rsi //move search string into 2nd arg
-	movq	$0, %rdx //set print occ == 0 (3rd arg)
-	call	find_all_occurrences
-	movl	%eax, %esi //move number of occurrences ret by find all occ into 3rd arg of printf
-	movq	$numOcc, %rdi
-	movl	$0, %eax //zero out ret val
-	call	printf
+	cmpl	$3, %ebx				//check if argc == 3
+	sete	%dl						//set %dl = 1 if ^
+	testl	%r13d, %r13d			//if has_c_flag is not true -> sets zero flag
+	sete	%cl						//set %cl = 1 if ^
+	testb	%dl, %cl				//if dl != cl -> argc == 4 or error
+									//if dl == cl -> argc == 3 & has_c_flag not true
+	jne	.Lmain_printAllOcc
+	cmpl	$4, %ebx				//check if argc == 4
+	je	.Lmain_getNumOcc			//if so, get number of occurrences
+									//else, print error message
 
-.Lmain_closeFilePtr:
-	movq	%r15, %rdi
-	call	fclose
+.Lmain_errorOther:
+	movq	stderr(%rip), %rdi		//move output stream=stderr to 1st arg
+	leaq	errorMsg(%rip), %rsi		//move error message to 2nd arg
+	jmp .Lmain_printErrorMsgExit1	//jmp to label where msg is printed & exit(1)
 
-.Lmain_setReturnValue0:
-	movl	$0, %eax
-	jmp .Lmain_alignStackAndRet
 
-.Lmain_findAllOccurrences_displayMatches:
-	movl	$1, %edx
-	movq	%r13, %rsi
-	movq	%r15, %rdi
-	call	find_all_occurrences
-	jmp	.Lmain_closeFilePtr
+.Lmain_errorCannotOpenFile:
+	movq	stderr(%rip), %rdi		//move output stream=stderr to 1st arg
+	leaq	cannotOpenFile(%rip), %rsi		//move error message to 2nd arg
+	jmp .Lmain_printErrorMsgExit1	//jmp to label where msg is printed & exit(1)
 
-.Lmain_exitOnError_insufficientArgs:
-	movq	$insufficientArgs, %rsi //move fmt str to first arg
-	jmp .Lmain_printErrorMsg
 
-.Lmain_exitOnError_tooManyArgs:
-	movq	$tooManyArgs, %rsi
-	jmp .Lmain_printErrorMsg
+.Lmain_printAllOcc:
+	movq	%rbp, %rdi			//(1st arg) move file pointer to rdi
+	movq	%r12, %rsi			//(2nd arg) move search string to rsi
+	movl	$1, %edx			//(3rd arg) move printOccurrences = 1 to lower half of rdx
+	call	find_all_occurrences //call find all occurrences (will print output in function)
 
-.Lmain_exitOnError_cantOpenFile:
-	movq	$cannotOpenFile, %rsi
-	jmp .Lmain_printErrorMsg
+.Lmain_closeFileExit0:
+	movq	%rbp, %rdi		//move file pointer to 1st arg
+	call	fclose			//close file
+	movl	$0, %edi		//set exit code = 0
+	call	exit			//exit(0)
 
-.Lmain_exitOnError_other:
-    
-	movq	%r15, %rdi
-	call    fclose
-    movq	$errorMsg, %rsi
-	jmp .Lmain_printErrorMsg
+.Lmain_printErrorMsgExit1:
+	call	fprintf			//print error message (arguments loaded before jmp)
+	xor 	%rdi, %rdi		//zero out rdi (was formerly ptr address)
+	movl	$1, %edi		//set exit code = 1
+	call	exit			//exit(1)
 
-.Lmain_printErrorMsg:
-	movq	stderr(%rip), %rdi
-	call	fprintf
-	movl	$1, %eax
 
-.Lmain_alignStackAndRet:
-	
-    popq	%rbx
-	popq	%rbp
-	popq	%r12
-	popq	%r13
-	popq	%r14
-	popq 	%r15
-	ret
+.Lmain_getNumOcc:
+
+	movq	%rbp, %rdi		//(1st arg) move file pointer to rdi
+	movq	%r12, %rsi		//(2nd arg) move search string to rsi
+	movl	$0, %edx		//(3rd arg) move printOccurrences = 0 to lower half of rdx
+	call	find_all_occurrences //call find all occurrences (need to print output after functions)
+
+	movl	%eax, %edx			//move value returned from find_all_occurrences to 3rd arg
+	leaq	numOcc(%rip), %rsi	//move format string to 2nd arg
+	movq	stdout(%rip), %rdi	//move output stream to 1st arg
+	call	fprintf				//print num occ. to stdout
+
+	jmp	.Lmain_closeFileExit0	//close input file & exit with exit code=0
