@@ -39,8 +39,8 @@ find_string_length:
 	incl %eax 							//increment eax which stores str len
 	jmp .LfindStrLen_checkNullTerm 		//check for null terminator after each loop 
 .LfindStrLen_checkNullTerm: 			//check for null term.
-	movslq	%eax, %rdx
-	cmpb	$0, (%rdi,%rdx)
+	movslq	%eax, %rdx					
+	cmpb	$0, (%rdi,%rdx)				//check if 0 ==  (%rdi+ rdx)
 	jne .LfindStrLen_incrementLengthAndPointer 		// if \0 == (%rdi), jump to .LfindStrLen_doneWithLoop 
 
 .LfindStrLen_doneWithLoop:
@@ -74,8 +74,8 @@ strings_equal:
 	movq	%r12, %rdi			//move stored s2(in r12) to rdi to call fn
 	call	find_string_length	//find_str_len(%rdi = string 2)
 	cmpl	%eax, %ebx			//compare string lengths (eax=s2_len, ebx=s1_len)
-	je	.LstrEq_lengthsAreEqual //jump if equal - will zero out eax + enter main loop
-	movl	$0, %eax			//else: move 0 into eax (to return strings_equal = false)
+	je	.LstrEq_lengthsAreEqual //jump if equal - will zero out eax + enter main loop to check strings
+	movl	$0, %eax			//else: move 0 into eax (to return strings_equal = false), and goes straight to LstrEq_restoreStackAndReturn
 .LstrEq_restoreStackAndReturn:
 	popq	%rbx				//pop callee saved registers in reverse order that we pushed them
 	popq	%rbp				//	"
@@ -83,17 +83,17 @@ strings_equal:
 	ret
 
 .LstrEq_lengthsAreEqual:
-	movl	$0, %eax				//zero out eax before entering main loop as it's being used as a counter
+	movl	$0, %eax				//zero out eax before entering main loop because it's being used as a counter
 
 .LstrEq_checkCharEq: 				//Main loop: checks each char to see if eq.
-	cmpl	%ebx, %eax				// compare ebx to eax
+	cmpl	%ebx, %eax				// compare ebx to eax TODO: why?
 	je	.LstrEq_isTrue				//if(eax = ebx: know str eq is true)
 	movslq	%eax, %rdx				//move 4 byte val in eax to rdx so you can address the current char. in each string
 	movzbl	0(%r12, %rdx, 1), %ecx	//zero out upper 56 bits & move char in str2[r12] & index[rdx] to low 8 bits of rcx[cl]
 	cmpb	%cl, 0(%rbp, %rdx, 1)	//compare char from str2 [cl] with char from str1 [0(%rbp, %rdx, 1) = 0 + str1_mem_loc[rbp] + (index[rdx] * offset[1])]	
 	jne	.LstrEq_isFalse				//if chars aren't equal - strings can't be equal! Jump to return false.
 	incl %eax						//else: increment eax
-	jmp	.LstrEq_checkCharEq			//go back to top!
+	jmp	.LstrEq_checkCharEq			//go back to top of loop!
 
 .LstrEq_isTrue:
 	movl	$1, %eax				//set return value = 1
@@ -118,36 +118,36 @@ strings_equal:
  */
 /*--------BEGIN: count_occurrences-------------------------------------------------*/
 count_occurrences:
-    pushq	%r15 		//moving search string into r15
-	pushq	%r14 		//using it for string length of line & modif. when calc last_index
+    pushq	%r15 		//will be storing search string into r15
+	pushq	%r14 		//will be using it for string length of line & modif. when calc last_index
 	pushq	%r13 		//intermediary return value
-	pushq	%r12 		//moving line into r12
+	pushq	%r12 		//will be storing line into r12
 	pushq	%rbp 		//pointer to array
-	pushq	%rbx 		//storing string length (termination condition for inner loop)
-	subq	$536, %rsp 	//allocate a total of 592 bytes on stack?
+	pushq	%rbx 		//will be storing string length (termination condition for inner loop)
+	subq	$536, %rsp 	//allocate a total of 592 bytes on stack? TODO: make sure this is correct
 
     
-    movq	%rdi, %r12 	//store first arg in r12
-	movq	%rsi, %r15 	//store 2nd arg in r15
+    movq	%rdi, %r12 	//store first arg (from rdi) in r12
+	movq	%rsi, %r15 	//store 2nd arg (from rsi) in r15
 
 	movl 	$0, %eax 			//zero out eax
 	call	find_string_length 	//find str len of line
 	movl	%eax, %r14d 		//move result into r14d
 	movq	%r15, %rdi 			//move 2nd arg into rdi
-	call	find_string_length 	//find string length of search string
+	call	find_string_length 	//find string length(rdi = search string) of search string
 	testl	%eax, %eax 			//check if str_len == 0
 	je	.LcountOcc_setRetValEq0 //if str len = 0, nothing matches - align stack & ret
-	movl	%eax, %ebx
-	cmpl	$512, %eax 			//check if string length > 511 (i.e. > 510)
-	jge	.LcountOcc_setRetValEq0	//if greater than, jump to return 0
-	cmpl	$512, %r14d
-	jl .LcountOcc_findLastIndex
-	movl	$512, %r14d
+	movl	%eax, %ebx			// else store length to be used as counter
+	cmpl	$510, %eax 			//check if string length >= 511 (i.e. > 510)
+	jg	.LcountOcc_setRetValEq0	//if greater than, jump to return 0
+	cmpl	$512, %r14d			//check if line is >= 512
+	jle	.LcountOcc_findLastIndex //if not, go to loop
+	movl	$512, %r14d			//if line is >512, then we should only search the first 512 chars so we move 512 to line_len variable
 .LcountOcc_findLastIndex:	
 	subl	%ebx, %r14d 		//calc last index = line len - str len
 	js	.LcountOcc_setRetValEq0
 	movl	$0, %ebp 			//int i = 0
-	movl	$0, %r13d 			//line_total = 0
+	movl	$0, %r13d 			//line_total = 0 (counter)
 	jmp	.LcountOcc_checkCondition_iLessThanLastIndex
 .LcountOcc_getSubstringFromLine:
 	leaq	0(%rbp,%rax), %rdx //rdx = i + j
@@ -157,7 +157,7 @@ count_occurrences:
 	incl    %eax //increment j
 .LcountOcc_checkCondition_jLessThanStrLen:
 	cmpl	%ebx, %eax //compare str_len to j
-	jl	.LcountOcc_getSubstringFromLine
+	jl	.LcountOcc_getSubstringFromLine		//
 	movslq	%ebx, %rax //sign extend str_len to 8 bytes 
 	movb	$0, (%rsp,%rax) //null terminate substr
 	movq	%rsp, %rdi //move substr to 1st arg
@@ -175,7 +175,8 @@ count_occurrences:
 .LcountOcc_alignStackAndReturn:
 	movl	%r13d, %eax //move line total to return value
 	addq	$536, %rsp //align stack
-	popq	%rbx		//"
+
+	popq	%rbx		//pop callee saved registers in reverse order that we pushed them
 	popq	%rbp		//"
 	popq	%r12		//"
 	popq	%r13		//"
@@ -223,14 +224,14 @@ read_line:
 	cmpl	$511, %ebx //if ebx >=511, break out of loop
 	jge	.LreadLine_setReturnValue
 	movq	%r12, %rdi //move file ptr back into rdi
-	call	fgetc
-	incl	%ebx
+	call	fgetc	//get file (rdi = file ptr)
+	incl	%ebx	// increment counter
 	jmp	.LreadLine_checkIfValidChar
-
+	//TODO: does the code ever get here?
 	je .LreadLine_setReturnValue
 
 .LreadLine_setReturnValueTo0:
-	movl $0, %eax
+	movl $0, %eax	//move 0 (indicating EOF) to return register
 	jmp .LreadLine_alignStackAndReturn
 
 .LreadLine_setReturnValue:
@@ -240,12 +241,12 @@ read_line:
 	cmpb $-1, %al //check if last char was EOF
 	je .LreadLine_setReturnValueTo0
 	
-	movl $1, %eax
+	movl $1, %eax	//move 1, (has next line = true) into return register
 
 .LreadLine_alignStackAndReturn:
-	popq %rbx
-	popq %rbp
-	popq %r12
+	popq %rbx	//pop callee saved registers in reverse order that we pushed them
+	popq %rbp	//"
+	popq %r12	//"
 	ret
 
 /*--------END: read_line---------------------------------------------------*/
@@ -272,9 +273,9 @@ print_line:
 	movq	%rsi, %rdx //move buffer ptr to rdx = 3rd arg
 	movq	$.printStr_formatStr, %rsi //move format str to 2nd arg
 	movl	$0, %eax //zero out return value
-	call	fprintf
+	call	fprintf	//arg in rdi, previously verified is not null
 .LprintLine_return:
-	addq $8, %rsp
+	addq $8, %rsp	//realign stack ptr
 	ret
 
 /*--------END: print_line--------------------------------------------------*/
@@ -295,28 +296,30 @@ print_line:
  */
 /*--------BEGIN: find_all_occurrences---------------------------------------------------*/
 find_all_occurrences:
+	//push callee saved registers r15, r14, r13, r12, rbp, rbx	
+	//need to pop in reverse order before returning to maintain stack alignment
 	pushq	%r15
 	pushq	%r14
 	pushq	%r13
 	pushq	%r12
 	pushq	%rbp
 	pushq	%rbx
-	subq	$536, %rsp
-	movq	%rdi, %r14  //store file handle
-	movq	%rsi, %r13//store search str
-	movl	%edx, %r12d//store bool: printOccurrences
-	movq	%rax, 520(%rsp)
+	subq	$536, %rsp 	//allocate a total of 536 bytes on stack
+	movq	%rdi, %r14  //store file ptr
+	movq	%rsi, %r13  //store search str
+	movl	%edx, %r12d //store bool: printOccurrences
+	movq	%rax, 520(%rsp)	//TODO add comments
 	xorl	%eax, %eax
-	movl	$0, %ebx
+	movl	$0, %ebx	
 	movl	$1, %ebp //hasNextLine=true
 .LfindAllOcc_whileHasNextLine:
-	testl	%ebp, %ebp
-	je	.LfindAllOcc_alignStackAndReturn
+	testl	%ebp, %ebp	//check if == 0 (0 = has next line, 1 = EOF)
+	je	.LfindAllOcc_alignStackAndReturn	//does not have next line, return
 	movb	$0, 511(%rsp)
-	movq	%rsp, %r15
+	movq	%rsp, %r15	//TODO: Why are we moving rsp to r15 and then r15 to rsi?
 	movq	%r15, %rsi
-	movq	%r14, %rdi
-	call	read_line
+	movq	%r14, %rdi	//Move file ptr to 1st arg register
+	call	read_line	//call readline (rdi = File prt)
 	movl	%eax, %ebp
 	movq	%r13, %rsi
 	movq	%r15, %rdi
@@ -324,8 +327,8 @@ find_all_occurrences:
 	addl	%eax, %ebx
 	cmpl	$1, %r12d
 	sete	%dl
-	testl	%eax, %eax
-	setne	%al
+	testl	%eax, %eax	//check if eax == 0, set ZF accordingly
+	setne	%al	//eax != 0, set %al to 0, otherwise set %al to 1
 	testb	%al, %dl
 	je	.LfindAllOcc_whileHasNextLine
 	movq	%rsp, %rsi
