@@ -1,4 +1,4 @@
-;#define MAXLINE 511
+#define MAXLINE 511
 
 /*
  * Assembly language implementations of functions declared in
@@ -130,25 +130,30 @@ count_occurrences:
     movq	%rdi, %r12 	//store first arg (from rdi) in r12
 	movq	%rsi, %r15 	//store 2nd arg (from rsi) in r15
 
-	movl 	$0, %eax 			//zero out eax
+.LcountOcc_getSearchStrLength:
+	xorl 	%eax, %eax 			//zero out eax (faster to xor w itself than move a 0 immediate val)
+	movq	%rsi, %rdi
 	call	find_string_length 	//find str len of line
-	movl	%eax, %r14d 		//move result into r14d
-	movq	%r15, %rdi 			//move 2nd arg into rdi
-	call	find_string_length 	//find string length(rdi = search string) of search string
-	testl	%eax, %eax 			//check if str_len == 0
-	je	.LcountOcc_setRetValEq0 //if str len = 0, nothing matches - align stack & ret
-	movl	%eax, %ebx			// else store length to be used as counter
-	cmpl	$511, %eax 			//check if string length > 511
-	jg	.LcountOcc_setRetValEq0	//if greater than, jump to return 0
-	cmpl	$510, %r14d			//check if line is >= 512
-	jle	.LcountOcc_findLastIndex //if not, go to loop
-	movl	$512, %r14d			//if line is >=512, then we should only search the first 511 chars so we move 512 to line_len variable
+	testl %eax, %eax //check if length of search str = 0
+	jne	.LcountOcc_getLineLength //if not, get line length
+	jmp .LcountOcc_setRetValEq0 //else, search string has len=0 -> num occ = 0
+
+.LcountOcc_getLineLength:
+	movl	%eax, %ebx
+	movq	%r12, %rdi
+	call	find_string_length
+	cmpl	$511, %eax
+	jle	.LcountOcc_findLastIndex
+	movl	$511, %eax
+	
 .LcountOcc_findLastIndex:	
-	subl	%ebx, %r14d 		//calc last index = line len - str len
+	subl	%ebx, %eax	//calc last index = line len - str len
+	movl	%eax, %r14d	//store in r14d
 	js	.LcountOcc_setRetValEq0
 	movl	$0, %ebp 			//int i = 0
 	movl	$0, %r13d 			//line_total = 0 (counter)
 	jmp	.LcountOcc_checkCondition_iLessThanLastIndex
+
 .LcountOcc_getSubstringFromLine:
 	leaq	0(%rbp,%rax), %rdx //rdx = i + j
 	movzbl	(%r12,%rdx), %ecx//move line[i+j] into %cl
@@ -157,7 +162,12 @@ count_occurrences:
 	incl    %eax //increment j
 .LcountOcc_checkCondition_jLessThanStrLen:
 	cmpl	%ebx, %eax //compare str_len to j
-	jl	.LcountOcc_getSubstringFromLine		//
+	setl	%cl			//if eax =ebx cl is set=1
+	cmpl	$511, %eax
+	setle	%dl		//IF eax = 511, 0 flag set & dl=1
+	testb	%dl, %cl //double exit conditions in inner for loop
+	jne	.LcountOcc_getSubstringFromLine
+
 	movslq	%ebx, %rax //sign extend str_len to 8 bytes 
 	movb	$0, (%rsp,%rax) //null terminate substr
 	movq	%rsp, %rdi //move substr to 1st arg
@@ -167,8 +177,8 @@ count_occurrences:
 	incl	%ebp //increment i
 .LcountOcc_checkCondition_iLessThanLastIndex:
 	cmpl	%r14d, %ebp  //compare i to last index. If i is greater than equal, return line total
-	jge	.LcountOcc_alignStackAndReturn
-	movl	$0, %eax //else set j = 0 
+	jg	.LcountOcc_alignStackAndReturn
+	xorl %eax, %eax //else set j = 0 
 	jmp	.LcountOcc_checkCondition_jLessThanStrLen //jump into j loop
 .LcountOcc_setRetValEq0:
 	movl	$0, %r13d //set line_total = 0
@@ -197,57 +207,55 @@ count_occurrences:
  *    or NULL if the character does not occur in the string
  */
 /*--------BEGIN: read_line---------------------------------------------------*/
-
 read_line:
-	pushq %r12 //using to store file handle
-    pushq %rbp //using for buffer argument storage
-    pushq %rbx // using for index in buffer - 3*8 offset
+	pushq	%r12 	//counter var to store position in buffer
+	pushq	%rbp	//stores buffer
+	pushq	%rbx	//stores file pointer
 
-    movq %rdi, %r12//move file handle into r12
-	movq %rsi, %rbp //move buf(2nd argument) into rbp
-	call fgetc //get first character from file - will return char in %al (char -> 1 byte)
-	movl $0, %ebx //initialize index to be zero
+	movq	%rdi, %rbx 	//move file handle into rbx
+	movq	%rsi, %rbp	//move buffer to rbp
+	call	fgetc
+	movl	$0, %r12d	//initialize counter var
+	jmp	.LreadLine_topOfWhileLoop
 
-
-.LreadLine_checkIfValidChar:
-
-	cmpb	$-1, %al //check if fgetc gets negative result: i.e EOF
-	setne	%cl //sets ZF be ~ZF
-	cmpb	$10, %al //check if char is newline -> if so return val is 1
-	setne	%dl //sets ZF be ~ZF
-	testb	%dl, %cl //if equal, return 1, else continue in loop
-	je	.LreadLine_setReturnValue 
-
-	//beginning of "while loop"
-	movslq	%ebx, %rdx //sign extend ebx-> rdx
-	movb	%al, 0(%rbp,%rdx, 1)
-	cmpl	$511, %ebx //if ebx >=511, break out of loop
-	jge	.LreadLine_setReturnValue
-	movq	%r12, %rdi //move file ptr back into rdi
-	call	fgetc	//get file (rdi = file ptr)
-	incl	%ebx	// increment counter
-	jmp	.LreadLine_checkIfValidChar
-	//TODO: does the code ever get here?
-	je .LreadLine_setReturnValue
-
-.LreadLine_setReturnValueTo0:
-	movl $0, %eax	//move 0 (indicating EOF) to return register
-	jmp .LreadLine_alignStackAndReturn
+.LreadLine_getCharFromFile:
+	movq	%rbx, %rdi	//move file pointer to 1st arg
+	call	fgetc		//call fgetc (to get char from specified file)
+.LreadLine_topOfWhileLoop:
+	cmpb	$-1, %al 	//check if fgetc gets negative result: i.e EOF
+	setne	%cl 		//sets ZF be ~ZF
+	cmpb	$10, %al 	//check if char is newline -> if so return val is 1
+	setne	%dl 		//sets ZF be ~ZF
+	testb	%dl, %cl 	//if equal, return 1, else continue in loop
+	je	.LreadLine_setReturnValue
+	cmpl	$MAXLINE, %r12d 	//compare counter to 511, if greater and theres still chars left in file-> get them & dont do anything until encounter newline or EOF
+	jg	.LreadLine_getCharFromFile
+	movslq	%r12d, %rdx
+	movb	%al, 0(%rbp,%rdx)
+	movq	%rbx, %rdi	//move file ptr back into rdi
+	call	fgetc
+	incl 	%r12d 			//increment counter
+	jmp	.LreadLine_topOfWhileLoop
 
 .LreadLine_setReturnValue:
 	//null terminate before returning buffer
-	movslq %ebx, %rbx //extend index to be 8 byte num
-	movb $0, 0(%rbp, %rbx, 1) 	//null terminate buffer
+	movslq %r12d, %r12 //extend index to be 8 byte num
+	movb $0, 0(%rbp, %r12, 1) 	//null terminate buffer
 	cmpb $-1, %al //check if last char was EOF
-	je .LreadLine_setReturnValueTo0
+	je .LreadLine_return0
 	
 	movl $1, %eax	//move 1, (has next line = true) into return register
 
 .LreadLine_alignStackAndReturn:
-	popq %rbx	//pop callee saved registers in reverse order that we pushed them
-	popq %rbp	//"
-	popq %r12	//"
+	popq	%rbx	//pop callee saved registers in reverse order that we pushed them
+	popq	%rbp	//"
+	popq	%r12	//"
 	ret
+
+.LreadLine_return0:
+	movl	$0, %eax	//move 0 (indicating EOF) to return register
+	jmp	.LreadLine_alignStackAndReturn
+
 
 /*--------END: read_line---------------------------------------------------*/
 
@@ -280,9 +288,6 @@ print_line:
 
 /*--------END: print_line--------------------------------------------------*/
 
-
-
-
 /*
  * Description
  *
@@ -308,14 +313,14 @@ find_all_occurrences:
 	movq	%rdi, %r14  //store file ptr
 	movq	%rsi, %r13  //store search str
 	movl	%edx, %r12d //store bool: printOccurrences
-	movq	%rax, 520(%rsp)	//TODO add comments
-	xorl	%eax, %eax
-	movl	$0, %ebx	
+
+	xorl	%eax, %eax //zero out eax
+	xorl	%ebx, %ebx	//zero out ebx
 	movl	$1, %ebp //hasNextLine=true
 .LfindAllOcc_whileHasNextLine:
 	testl	%ebp, %ebp	//check if == 0 (0 = has next line, 1 = EOF)
 	je	.LfindAllOcc_alignStackAndReturn	//does not have next line, return
-	movb	$0, 511(%rsp)
+	movb	$0, MAXLINE(%rsp)
 	movq	%rsp, %r15	//TODO: Why are we moving rsp to r15 and then r15 to rsi?
 	movq	%r15, %rsi
 	movq	%r14, %rdi	//Move file ptr to 1st arg register
@@ -337,7 +342,7 @@ find_all_occurrences:
 	jmp	.LfindAllOcc_whileHasNextLine
 .LfindAllOcc_alignStackAndReturn:
 	movl	%ebx, %eax
-	movq	520(%rsp), %rcx
+
 	addq	$536, %rsp
 	popq	%rbx
 	popq	%rbp

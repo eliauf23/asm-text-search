@@ -6,14 +6,16 @@ int read_line(FILE *in, char *buf) {
     int index = 0;
     char c = fgetc(in);
     //get all characters until you encounter newline/EOF(=-1)/exceed line max
-    while (c != -1 && c != '\n')
+    while (c != EOF && c != '\n')
     {
         //TODO: check to make sure we don't read memory out of bounds
-        buf[index] = c;
-        if(index < MAXLINE) {
+        if(index <= MAXLINE) {
+            buf[index] = c;
             c = fgetc(in);
             index++;
-        } else break;
+        } else {
+            c = fgetc(in); //so you read past 511 and move file pointer to beginning of next line
+        }
     }
     //null terminate buffer - even if index = 511 == MAXLINE, not out of bounds
     buf[index] = '\0';
@@ -42,7 +44,10 @@ unsigned count_occurrences(const char *line, const char *str)
 
     int line_len = find_string_length(line);
     //only count up to the 512th character, even if string is longer
-    if(line_len > 512) line_len = 512;
+    if(line_len > MAXLINE) {
+        line_len = MAXLINE;
+    }
+
 
     int last_index = line_len - str_len;
 
@@ -50,7 +55,7 @@ unsigned count_occurrences(const char *line, const char *str)
 
     if (last_index < 0) return 0;
 
-    for (int i = 0; i < last_index; i++) {
+    for (int i = 0; i <= last_index; i++) {
         char substr[MAXLINE+1];
         for(int j = 0; j < str_len && j <= MAXLINE; j++) {
                 substr[j] = line[i + j];
@@ -106,7 +111,7 @@ unsigned find_all_occurrences(FILE *in, char *search, int printOccurrences)
     unsigned line_total = 0;
     while (has_next_line)
     {
-        char buf[MAXLINE + 1];
+        char buf[MAXLINE+1];
         buf[MAXLINE] = '\0'; 
         //have already checked that in can be opened
         has_next_line = read_line(in, buf); //will be 0 if EOF is encountered
