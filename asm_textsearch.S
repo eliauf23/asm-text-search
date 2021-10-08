@@ -1,10 +1,11 @@
 /*
  * Elizabeth Aufzien, eaufzie1@jh.edu
  * Rosie Wolkind, rwolkin1@jh.edu
- * 
+ * CSF Assignment 2
  * Assembly language implementation of the main function
  * for the asm_textsearch_fns program
  */	
+ 
 
  .section .rodata
 
