@@ -45,6 +45,7 @@ int main(int argc, char **argv)
         else
         {
             fprintf(stderr, "Error!");
+            fclose(input);
             exit(1);
         }
 

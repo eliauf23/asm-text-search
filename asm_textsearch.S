@@ -86,6 +86,8 @@ main:
 									//else, print error message
 
 .Lmain_errorOther:
+	movq	%rbp, %rdi				//move file pointer to 1st arg
+	call	fclose					//close file
 	movq	stderr(%rip), %rdi		//move output stream=stderr to 1st arg
 	leaq	errorMsg(%rip), %rsi	//move error message to 2nd arg
 	jmp .Lmain_printErrorMsgExit1	//jmp to label where msg is printed & exit(1)
