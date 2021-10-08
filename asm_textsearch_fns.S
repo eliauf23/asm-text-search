@@ -1,9 +1,12 @@
-#define MAXLINE 511
-
 /*
- * Assembly language implementations of functions declared in
- * textsearch_fns.h
+ * Assembly language implementations of functions declared in textsearch_fns.h
+ * CSF Assignment 2
+ * Elizabeth Aufzien eaufzie1@jh.edu
+ * Rosie Wolkind rwolkin1@jh.edu
  */
+ 
+ #define MAXLINE 511
+
 
  .section .rodata
 
@@ -20,7 +23,6 @@
 	.global find_all_occurrences
 /*
  * Description: Counts number of characters up to null terminator.
- * 
  *
  * Parameters:
  *   s - string.
@@ -32,7 +34,7 @@
 /*--------BEGIN: find_string_length------------------------------------------------*/
 find_string_length:
 	subq $8, %rsp 						//align stack pointer - restore address to multiple of 16
-	movl $0, %eax 						//zero out eax - could also XOR with itself?
+	xorl %eax, %eax 					//zero out eax
 	jmp .LfindStrLen_checkNullTerm
 
 .LfindStrLen_incLenAndPtr:
@@ -50,7 +52,6 @@ find_string_length:
 
 /*
  * Description: Checks equality of two strings.
- * 
  *
  * Parameters:
  *   s1 - string 1.
@@ -83,7 +84,7 @@ strings_equal:
 	ret
 
 .LstrEq_lengthsAreEqual:
-	movl	$0, %eax				//zero out eax before entering main loop because it's being used as a counter
+	xorl	%eax, %eax				//zero out eax before entering main loop(bc it's used as counter)
 
 .LstrEq_checkCharEq: 				//Main loop: checks each char to see if eq.
 	cmpl	%ebx, %eax				// compare ebx to eax: 
@@ -108,7 +109,6 @@ strings_equal:
 
 /*
  * Description: Count instances of search string in line from text file.
- * 
  *
  * Parameters:
  *   line - line from text file.
@@ -125,9 +125,8 @@ count_occurrences:
 	pushq	%r12 					//will be storing line into r12
 	pushq	%rbp 					//pointer to array
 	pushq	%rbx  					//will be storing string length (termination condition for inner loop)
-	subq	$536, %rsp 				//allocate a total of 568
+	subq	$520, %rsp 				//allocate a total of 568
 
-    
     movq	%rdi, %r12 				//store first arg (from rdi) in r12
 	movq	%rsi, %r15 				//store 2nd arg (from rsi) in r15
 
@@ -143,9 +142,9 @@ count_occurrences:
 	movl	%eax, %ebx				//move search string length to ebx
 	movq	%r12, %rdi				//move line to 1st arg
 	call	find_string_length		//call find str length
-	cmpl	$MAXLINE, %eax				//compare line length with 511
+	cmpl	$MAXLINE, %eax			//compare line length with 511
 	jle	.LcountOcc_findLastIndex	//if less than or equal to 511, calculate last index
-	movl	$MAXLINE, %eax				//else, set last index to search in line to = 511
+	movl	$MAXLINE, %eax			//else, set last index to search in line to = 511
 	
 .LcountOcc_findLastIndex:	
 	subl	%ebx, %eax				//calc last index = line len - str len
@@ -161,7 +160,7 @@ count_occurrences:
 	movslq	%eax, %rdx 				//rdx = j
 	movb	%cl, (%rsp,%rdx) 		//set substr[j] = line[i+j]
 	incl    %eax 					//increment j
-.LcountOcc_checkCondition_jLessThanStrLen:
+.LcountOcc_checkJLessThanStrLen:
 	cmpl	%ebx, %eax 				//compare str_len to j
 	setl	%cl						//if eax =ebx cl is set=1
 	cmpl	$MAXLINE, %eax
@@ -180,12 +179,12 @@ count_occurrences:
 	cmpl	%r14d, %ebp  			//compare i to last index. If i is greater than equal, return line total
 	jg	.LcountOcc_alignStackAndReturn
 	xorl %eax, %eax 				//else set j = 0 
-	jmp	.LcountOcc_checkCondition_jLessThanStrLen //jump into j loop
+	jmp	.LcountOcc_checkJLessThanStrLen //jump into j loop
 .LcountOcc_setRetValEq0:
-	movl	$0, %r13d 				//set line_total = 0
+	xorl	%r13d, %r13d 			//set line_total = 0
 .LcountOcc_alignStackAndReturn:
 	movl	%r13d, %eax 			//move line total to return value
-	addq	$536, %rsp 				//align stack
+	addq	$520, %rsp 				//align stack
 
 	popq	%rbx	//pop callee saved registers in reverse order that we pushed them
 	popq	%rbp	//"
@@ -240,17 +239,16 @@ read_line:
 	jmp	.LreadLine_topOfWhileLoop
 
 .LreadLine_setReturnValue:
-	//null terminate before returning buffer
 	movslq %r12d, %r12 			//extend index to be 8 byte num
 	movb $0, 0(%rbp, %r12, 1) 	//null terminate buffer
 	cmpb $-1, %al 				//check if last char was EOF (ubuntu 1804 EOF should always = -1)
-	je .LreadLine_return0
-	movl $1, %eax	//move 1, (has next line = true) into return register
+	je .LreadLine_return0		//if last char was EOF -> return 0
+	movl $1, %eax				//else, move 1, (has next line = true) into return register
 
 .LreadLine_alignStackAndReturn:
-	popq	%rbx	//pop callee saved registers in reverse order that we pushed them
-	popq	%rbp	//"
-	popq	%r12	//"
+	popq	%rbx				//pop callee saved registers in reverse order that we pushed them
+	popq	%rbp				//"
+	popq	%r12				//"
 	ret
 
 .LreadLine_return0:
@@ -258,18 +256,14 @@ read_line:
 	jmp	.LreadLine_alignStackAndReturn
 /*--------END: read_line---------------------------------------------------*/
 
-
 /*
  * Description: Prints line of text contained in buf.
- * 
  *
  * Parameters:
  *   out - output file/output stream
  *   buf - buffer with line to print
- *   
  */
 /*--------BEGIN: print_line---------------------------------------------------*/
-
 print_line:
 	subq	$8, %rsp 			//align stack ptr
 	testq %rdi, %rdi 			//check if rdi is null
@@ -278,16 +272,15 @@ print_line:
 	movq	$.formatStr, %rsi 	//move format str to 2nd arg
 	movl	$0, %eax 			//zero out return value
 	call	fprintf				//arg in rdi, previously verified is not null
+
 .LprintLine_return:
 	addq $8, %rsp				//realign stack ptr
 	ret
-
 /*--------END: print_line--------------------------------------------------*/
 
 /*
  * Description: Find number of occurrences in entire text file (and print if argc=3)
  * 
- *
  * Parameters:
  *   in - file ptr.
  *   search - search string
@@ -298,49 +291,50 @@ print_line:
  */
 /*--------BEGIN: find_all_occurrences---------------------------------------------------*/
 find_all_occurrences:
-	//push callee saved registers r15, r14, r13, r12, rbp, rbx	
-	//need to pop in reverse order before returning to maintain stack alignment
-	pushq	%r15		//offset -8	: stores
-	pushq	%r14		//offset -16:
-	pushq	%r13		//offset -24:
-	pushq	%r12		//offset -32:
-	pushq	%rbp		//offset -40:
-	pushq	%rbx		//offset -48:
-	subq	$520, %rsp 	//total stack offset = abs(-48 - 520) = 568 bytes on stack
-	movq	%rdi, %r14  //store file ptr
-	movq	%rsi, %r13  //store search str
-	movl	%edx, %r12d //store boolean: printOccurrences
+	/* push callee saved registers r15, r14, r13, r12, rbp, rbx	
+	need to pop in reverse order before returning to maintain stack alignment */
+	pushq	%r15					//offset -8	: stores
+	pushq	%r14					//offset -16:
+	pushq	%r13					//offset -24:
+	pushq	%r12					//offset -32:
+	pushq	%rbp					//offset -40:
+	pushq	%rbx					//offset -48:
+	subq	$520, %rsp 				//total stack offset = abs(-48 - 520) = 568 bytes on stack
+	movq	%rdi, %r14  			//store file ptr
+	movq	%rsi, %r13 				//store search str
+	movl	%edx, %r12d				//store boolean: printOccurrences
 
-	xorl	%eax, %eax 	//zero out eax
-	xorl	%ebx, %ebx	//zero out ebx
-	movl	$1, %ebp 	//hasNextLine=true
+	xorl	%eax, %eax 				//zero out eax
+	xorl	%ebx, %ebx				//zero out ebx
+	movl	$1, %ebp 				//set hasNextLine=true
+
 .LfindAllOcc_whileHasNextLine:
-	testl	%ebp, %ebp	//check if == 0 (0 = has next line, 1 = EOF)
-	je	.LfindAllOcc_alignStackAndReturn	//does not have next line, return
-	movb	$0, MAXLINE(%rsp)
-	movq	%rsp, %r15	//store stack pointer in r15
-	movq	%rsp, %rsi	//additionally move it to 2nd arg bc %rsp pts to buffer
-	movq	%r14, %rdi	//Move file ptr to 1st arg register
-	call	read_line	//call read_line (rdi = File ptr)
-	movl	%eax, %ebp	//move return value to ebp (either 0 or 1)
-	movq	%r13, %rsi	//move search string to 2nd arg
-	movq	%r15, %rdi	//move buffer containing line to 1st arg
-	call	count_occurrences //call count_occ(*line, *searchstr)
-	addl	%eax, %ebx	//add return val (unsigned int) to ebx which stores the total count of matches in file
-	cmpl	$1, %r12d	//check if printOccurrences = true (== 1)
-	sete	%dl			//if so, set %dl = 1
-	testl	%eax, %eax	//check if eax == 0, set ZF accordingly
-	setne	%al			//eax != 0, set %al to 0, otherwise set %al to 1
-	testb	%al, %dl	//if they both = 1: i.e. num occurrences != 0 & printOcc == 1 -> print results
+	testl	%ebp, %ebp				//check if == 0 (0 = has next line, 1 = EOF)
+	je	.LfindAllOcc_alignStackAndReturn
+	movb	$0, MAXLINE(%rsp)		//null terminate char buffer[511]
+	movq	%rsp, %r15				//store stack pointer in r15
+	movq	%rsp, %rsi				//additionally move it to 2nd arg bc %rsp pts to buffer
+	movq	%r14, %rdi				//Move file ptr to 1st arg register
+	call	read_line				//call read_line (rdi = File ptr)
+	movl	%eax, %ebp				//move return value to ebp (either 0 or 1)
+	movq	%r13, %rsi				//move search string to 2nd arg
+	movq	%r15, %rdi				//move buffer containing line to 1st arg
+	call	count_occurrences 		//call count_occ(*line, *searchstr)
+	addl	%eax, %ebx				//add return val (unsigned int) to ebx which stores the total count of matches in file
+	cmpl	$1, %r12d				//check if printOccurrences = true (== 1)
+	sete	%dl						//if so, set %dl = 1
+	testl	%eax, %eax				//check if eax == 0, set ZF accordingly
+	setne	%al						//eax != 0, set %al to 0, otherwise set %al to 1
+	testb	%al, %dl				//if they both = 1: i.e. num occurrences != 0 & printOcc == 1 -> print results
 	je	.LfindAllOcc_whileHasNextLine //else, don't print (just store num occ)
-	movq	%rsp, %rsi			//to print: move line to 2nd arg
-	movq	stdout(%rip), %rdi	//move output stream to 1st arg
-	call	print_line			//call print line
+	movq	%rsp, %rsi				//to print: move line to 2nd arg
+	movq	stdout(%rip), %rdi		//move output stream to 1st arg
+	call	print_line				//call print line
 	jmp	.LfindAllOcc_whileHasNextLine
 .LfindAllOcc_alignStackAndReturn:
-	movl	%ebx, %eax 	//total stack offset at this point = 512 + 6*8 + 8(so stack is odd multiple of 8) = 568
-	addq	$520, %rsp	//add 520 back to stack
-	popq	%rbx		//pop callee saved registers in reverse order that they were pushed
+	movl	%ebx, %eax 				//total stack offset at this point = 512 + 6*8 + 8(so stack is odd multiple of 8) = 568
+	addq	$520, %rsp				//add 520 back to stack
+	popq	%rbx					//pop callee saved registers in reverse order that they were pushed
 	popq	%rbp		
 	popq	%r12
 	popq	%r13
