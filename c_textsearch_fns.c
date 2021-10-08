@@ -1,3 +1,11 @@
+/*
+ * Source file that implements text search functions.
+ * CSF Assignment 2
+ * Elizabeth Aufzien eaufzie1@jh.edu
+ * Rosie Wolkind rwolkin1@jh.edu
+ */
+
+
 #include <stdio.h>
 #include <stdlib.h> 
 #include "textsearch_fns.h"
@@ -8,7 +16,6 @@ int read_line(FILE *in, char *buf) {
     //get all characters until you encounter newline/EOF(=-1)/exceed line max
     while (c != EOF && c != '\n')
     {
-        //TODO: check to make sure we don't read memory out of bounds
         if(index <= MAXLINE) {
             buf[index] = c;
             c = fgetc(in);
@@ -51,8 +58,6 @@ unsigned count_occurrences(const char *line, const char *str)
 
     int last_index = line_len - str_len;
 
-   // printf("For string \"%s\": line len - str len = last index: %d - %d = %d\n\n", str, line_len, str_len, last_index);
-
     if (last_index < 0) return 0;
 
     for (int i = 0; i <= last_index; i++) {
@@ -75,16 +80,6 @@ unsigned find_string_length(const char *s)
         len++;
     }
     return len;
-}
-
-int starts_with(const char *s, const char *pfx) {
-    int pfx_len = find_string_length(pfx);
-    for(int i = 0; i < pfx_len; i++) {
-        if(pfx[i] != s[i]) {
-            return 0;
-        }
-    }
-    return 1; //true
 }
 
 int strings_equal(const char *s1, const char *s2)
