@@ -17,7 +17,7 @@ cFlag:
 	.string	"-c"
 readStr:
 	.string	"r"
-cannotOpenFile:
+cantOpenFile:
 	.string	"File cannot be opened.\n"
 numOcc:
 	.string	"%d occurrence(s)\n"
@@ -31,29 +31,29 @@ errorMsg:
 main:
 
 	/* push callee saved registers & align stack */
-	pushq	%r13		//offset: 8
-	pushq	%r12		//offset: 16
-	pushq	%rbp		//offset: 24
-	pushq	%rbx		//offset: 32
-	subq	$8, %rsp 	//to properly align stack (offset = 40 - odd. mult of 8)
+	pushq	%r13					//offset: 8
+	pushq	%r12					//offset: 16
+	pushq	%rbp					//offset: 24
+	pushq	%rbx					//offset: 32
+	subq	$8, %rsp			 	//to properly align stack (offset = 40 - odd. mult of 8)
 	
-	cmpl	$2, %edi 	//check if argc < 3
+	cmpl	$2, %edi 				//check if argc < 3
 	jle	.Lmain_errorInsufficientArgs
 
-	movl	%edi, %ebx	//store argc in ebx so we can check if argc = 3 or 4 (to set value of print occurrences)
-	cmpl	$4, %edi	//check if argc <= 4 (& to get here must be >= 3)
+	movl	%edi, %ebx				//store argc in ebx so we can check if argc = 3 or 4 (to set value of print occurrences)
+	cmpl	$4, %edi				//check if argc <= 4 (& to get here must be >= 3)
 	jle	.Lmain_openFileAndCountOcc
 
 .Lmain_errorTooManyArgs:
 	movq	stderr(%rip), %rdi		//move output stream=stderr to 1st arg
-	leaq	tooManyArgs(%rip), %rsi		//move error message to 2nd arg
+	leaq	tooManyArgs(%rip), %rsi	//move error message to 2nd arg
 	jmp .Lmain_printErrorMsgExit1	//jmp to label where msg is printed & exit(1)
 
 
 .Lmain_errorInsufficientArgs:
-	movq	stderr(%rip), %rdi		//move output stream=stderr to 1st arg
-	leaq	insufficientArgs(%rip), %rsi		//move error message to 2nd arg
-	jmp .Lmain_printErrorMsgExit1	//jmp to label where msg is printed & exit(1)
+	movq	stderr(%rip), %rdi			 //move output stream=stderr to 1st arg
+	leaq	insufficientArgs(%rip), %rsi //move error message to 2nd arg
+	jmp .Lmain_printErrorMsgExit1		 //jmp to label where msg is printed & exit(1)
 
 
 .Lmain_openFileAndCountOcc:
@@ -67,12 +67,12 @@ main:
 	movl	%eax, %r13d 			//move result = has_c_flag to r13d
 
 	movq	%rbp, %rdi 				//move pointer to filename to first arg
-	leaq	readStr(%rip), %rsi 		//load "r" string to second arg
+	leaq	readStr(%rip), %rsi 	//load "r" string to second arg
 	call	fopen					//try to open file
 
 	movq	%rax, %rbp				//store file pointer in rbp (rax not eax bc its a mem. address)
 	testq	%rax, %rax				//check if rax is null (i.e. rax & rax bitwise = zero vector)
-	jz	.Lmain_errorCannotOpenFile	//if file ptr is NULL --> print err msg to stderr & exit(1)
+	jz	.Lmain_errorcantOpenFile	//if file ptr is NULL --> print err msg to stderr & exit(1)
 	
 	cmpl	$3, %ebx				//check if argc == 3
 	sete	%dl						//set %dl = 1 if ^
@@ -87,45 +87,45 @@ main:
 
 .Lmain_errorOther:
 	movq	stderr(%rip), %rdi		//move output stream=stderr to 1st arg
-	leaq	errorMsg(%rip), %rsi		//move error message to 2nd arg
+	leaq	errorMsg(%rip), %rsi	//move error message to 2nd arg
 	jmp .Lmain_printErrorMsgExit1	//jmp to label where msg is printed & exit(1)
 
 
-.Lmain_errorCannotOpenFile:
+.Lmain_errorcantOpenFile:
 	movq	stderr(%rip), %rdi		//move output stream=stderr to 1st arg
-	leaq	cannotOpenFile(%rip), %rsi		//move error message to 2nd arg
+	leaq	cantOpenFile(%rip), %rsi//move error message to 2nd arg
 	jmp .Lmain_printErrorMsgExit1	//jmp to label where msg is printed & exit(1)
 
 
 .Lmain_printAllOcc:
-	movq	%rbp, %rdi			//(1st arg) move file pointer to rdi
-	movq	%r12, %rsi			//(2nd arg) move search string to rsi
-	movl	$1, %edx			//(3rd arg) move printOccurrences = 1 to lower half of rdx
-	call	find_all_occurrences //call find all occurrences (will print output in function)
+	movq	%rbp, %rdi				//(1st arg) move file pointer to rdi
+	movq	%r12, %rsi				//(2nd arg) move search string to rsi
+	movl	$1, %edx				//(3rd arg) move printOccurrences = 1 to lower half of rdx
+	call	find_all_occurrences	//call find all occurrences (will print output in function)
 
 .Lmain_closeFileExit0:
-	movq	%rbp, %rdi		//move file pointer to 1st arg
-	call	fclose			//close file
-	movl	$0, %edi		//set exit code = 0
-	call	exit			//exit(0)
+	movq	%rbp, %rdi				//move file pointer to 1st arg
+	call	fclose					//close file
+	movl	$0, %edi				//set exit code = 0
+	call	exit					//exit(0)
 
 .Lmain_printErrorMsgExit1:
-	call	fprintf			//print error message (arguments loaded before jmp)
-	xor 	%rdi, %rdi		//zero out rdi (was formerly ptr address)
-	movl	$1, %edi		//set exit code = 1
-	call	exit			//exit(1)
+	call	fprintf					//print error message (arguments loaded before jmp)
+	xor 	%rdi, %rdi				//zero out rdi (was formerly ptr address)
+	movl	$1, %edi				//set exit code = 1
+	call	exit					//exit(1)
 
 
 .Lmain_getNumOcc:
 
-	movq	%rbp, %rdi		//(1st arg) move file pointer to rdi
-	movq	%r12, %rsi		//(2nd arg) move search string to rsi
-	movl	$0, %edx		//(3rd arg) move printOccurrences = 0 to lower half of rdx
-	call	find_all_occurrences //call find all occurrences (need to print output after functions)
+	movq	%rbp, %rdi				//(1st arg) move file pointer to rdi
+	movq	%r12, %rsi				//(2nd arg) move search string to rsi
+	movl	$0, %edx				//(3rd arg) move printOccurrences = 0 to lower half of rdx
+	call	find_all_occurrences 	//call find all occurrences (need to print output after functions)
 
-	movl	%eax, %edx			//move value returned from find_all_occurrences to 3rd arg
-	leaq	numOcc(%rip), %rsi	//move format string to 2nd arg
-	movq	stdout(%rip), %rdi	//move output stream to 1st arg
-	call	fprintf				//print num occ. to stdout
+	movl	%eax, %edx				//move value returned from find_all_occurrences to 3rd arg
+	leaq	numOcc(%rip), %rsi		//move format string to 2nd arg
+	movq	stdout(%rip), %rdi		//move output stream to 1st arg
+	call	fprintf					//print num occ. to stdout
 
-	jmp	.Lmain_closeFileExit0	//close input file & exit with exit code=0
+	jmp	.Lmain_closeFileExit0		//close input file & exit with exit code=0
