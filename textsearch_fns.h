@@ -1,3 +1,11 @@
+/*
+ * Header file containing function declarations for c_textsearch_fns.c & asm_textsearch_fns.S
+ * CSF Assignment 2
+ * Elizabeth Aufzien eaufzie1@jh.edu
+ * Rosie Wolkind rwolkin1@jh.edu
+ */
+
+
 #ifndef TEXTSEARCH_FNS_H
 #define TEXTSEARCH_FNS_H
 #include <stdio.h>
@@ -56,21 +64,6 @@ unsigned count_occurrences(const char *line, const char *str);
  *   length of string s
  */
 unsigned find_string_length(const char *s);
-
-
-/*
- * Description: Determines if string starts with a certain prefix.
- * 
- *
- * Parameters:
- *   s - string.
- *   pfx - prefix
- *
- * Returns:
- *   0 - false: s does not start with pfx
- *   1 - true: s starts with pfx
- */
-int starts_with(const char *s, const char *pfx);
 
 /*
  * Description: Checks equality of two strings.
